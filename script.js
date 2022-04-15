@@ -2367,7 +2367,6 @@ define(["jquery"], function ($) {
 		async function editWindowCategory(categoryData, hotelTariffs) {
 			$(".js-popup-edit").empty()
 			categoryData[0].facilities = JSON.parse(categoryData[0].facilities)
-			console.log(categoryData[0].facilities);
 			let tariffValue
 			if (categoryData[0].tariff_id != 0) {
 				await tariffHotelInfo(categoryData[0].tariff_id).then(
@@ -2381,7 +2380,7 @@ define(["jquery"], function ($) {
 			<div class="photos__nav navigation" data-link="photos">Фотографии</div>
 		</div>
 		<div class="close-popup js-close-popup-edit">&#10006;</div>
-		<form action="#" method="#" id="cottageForm">
+		<form action="#" method="#" id="cottageEditForm">
 			<div class="wrap-entity-popup">
 				<div class="description__entity-popup">
 					<label for="name">
@@ -2417,7 +2416,7 @@ define(["jquery"], function ($) {
 					<label for="tariff_id__cottage">
 						Ценовой тариф: 
 						<div class="cont">
-							<input type="text" name="tariff_id__cottage" data-id=""
+							<input type="text" name="tariff_id__cottage__edit" data-id=""
 								data-type="" class="tariffs__input text-input" placeholder="Выберите тариф" value="${
 									tariffValue != undefined ? tariffValue : ""
 								}"/>
@@ -2454,7 +2453,7 @@ define(["jquery"], function ($) {
 							<div class="clear__btn active">&#x2716;</div>
 						</div>
 					</label>
-					<div class="button-input" id="sendCategoryCottage">Сохранить</div>
+					<div class="button-input" id="sendEditCategoryCottage" data-id="${categoryData[0].category_id}">Сохранить</div>
 				</div>
 
 				<div class="conveniences__entity-popup hidden">
@@ -3131,15 +3130,6 @@ define(["jquery"], function ($) {
 		`
 
 			$(".js-popup-edit").append(res)
-
-			/* $(`.conveniences_value`).each(function() {
-				let idValue = $(this).attr('data-value-id')
-				if($(this).val()) {
-					$(`.conveniences-group-item[data-item-id="${idValue}"]`).prop('checked', 'true')
-				} else {
-					$(`.conveniences-group-item[data-item-id="${idValue}"]`).prop('checked', 'false')
-				}
-			}) */
 		}
 
 		async function getAdvancedSettings(
@@ -4267,8 +4257,11 @@ define(["jquery"], function ($) {
 			return res
 		}
 
-		function addCategoryCottage(file = "") {
-			const form = document.getElementById("cottageForm")
+		function addCategoryCottage(e, categoryId, file = "") {
+			let form
+			if($(e.target).is('#sendEditCategoryCottage')) {
+				form = document.getElementById("cottageEditForm")
+			}  else form = document.getElementById("cottageForm")
 
 			let formData = new FormData(form)
 			if (file != "") formData.append("image", file)
@@ -4277,7 +4270,12 @@ define(["jquery"], function ($) {
 
 			function formValidate(form) {
 				let error = 0
-				let formReq = $("#cottageForm ._req")
+				let formReq
+				if($(form).is('#cottageEditForm')) {
+					formReq = $('#cottageEditForm ._req')
+				} else {
+					formReq = $("#cottageForm ._req")
+				}
 
 				for (let i = 0; i < formReq.length; i++) {
 					const input = formReq[i]
@@ -4320,6 +4318,9 @@ define(["jquery"], function ($) {
 					} else if (name == "tariff_id__cottage") {
 						let tariff_id = $(`.tariffs__input[name="${name}"]`).attr("data-id")
 						data["tariff_id"] = Number(tariff_id)
+					} else if (name == 'tariff_id__cottage__edit') {
+						let tariff_id = $(`.tariffs__input[name="${name}"]`).attr("data-id")
+						data["tariff_id"] = Number(tariff_id)
 					} else if (name == "image") {
 						data["photos"][name] = String(value)
 					} else {
@@ -4332,18 +4333,47 @@ define(["jquery"], function ($) {
 				}
 				data["facilities"] = JSON.stringify(data["facilities"])
 				data = JSON.stringify(data)
-				saveCategoryCottageRequest(data).then((response) => {
-					$(".categories-cottage-list").append(`
-					<div class="categories-cottage-list__container entity-list">
-						<p class="categories-cottage-list__item" data-id="${response}">${nameForLayout}</p>
-						<p class="categories-cottage-list__item" id="editCategory" data-link="hotel" data-id="${response}">[Редактировать]</p>
-						<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash categories-cottage-list__item" id="deleteCategoryItemCottage" data-id="${response}"></img>
-					</div>
-				`)
-					$(".js-overlay").fadeOut()
-					form.reset()
-				})
+				if($(e.target).is('#sendEditCategoryCottage')) {
+					patchCategoryCottageRequest(data, categoryId).then((response) => {
+						$(".js-overlay-edit").fadeOut()
+						form.reset()
+					})
+				}  else {
+					saveCategoryCottageRequest(data).then((response) => {
+						$(".categories-cottage-list").append(`
+						<div class="categories-cottage-list__container entity-list">
+							<p class="categories-cottage-list__item" data-id="${response}">${nameForLayout}</p>
+							<p class="categories-cottage-list__item" id="editCategory" data-link="hotel" data-id="${response}">[Редактировать]</p>
+							<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash categories-cottage-list__item" id="deleteCategoryItemCottage" data-id="${response}"></img>
+						</div>
+					`)
+						$(".js-overlay").fadeOut()
+						form.reset()
+					})
+				}
 			}
+		}
+
+		function patchCategoryCottageRequest(data, categoryId) {
+			return new Promise((resolve) => {
+				$.ajax({
+					type: "PATCH",
+					url:
+						"https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/change_categories.php?id=" +
+						AMOCRM.constant("account").id + "&type_data=hotel&category_id=" + categoryId,
+					headers: {
+						"Content-type": "application/json",
+					},
+					data: data,
+					dataType: "json",
+					success: function (response) {
+						resolve(response)
+					},
+					error: function (err, response) {
+						console.debug(err)
+					},
+				})
+			})
 		}
 
 		function saveCategoryCottageRequest(data) {
@@ -4363,25 +4393,6 @@ define(["jquery"], function ($) {
 						resolve(response)
 					},
 					error: function (err, response) {
-						console.debug(err)
-					},
-				})
-			})
-		}
-
-		function getCategories() {
-			return new Promise((resolve) => {
-				$.ajax({
-					type: "GET",
-					url:
-						"https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/get_settings.php?id=" +
-						AMOCRM.constant("account").id +
-						"&type=category",
-					dataType: "json",
-					success: (response) => {
-						resolve(response)
-					},
-					error: function (err) {
 						console.debug(err)
 					},
 				})
@@ -5608,9 +5619,15 @@ define(["jquery"], function ($) {
 				})
 
 				//Отправка формы категорий
-				$("body").on("click", "#sendCategoryCottage", () => {
+				$("body").on("click", "#sendCategoryCottage", (e) => {
 					if (!$("#sendCategoryCottage").hasClass("button-input-disabled"))
-						addCategoryCottage()
+						addCategoryCottage(e)
+				})
+				$("body").on("click", "#sendEditCategoryCottage", (e) => {
+					if (!$("#sendEditCategoryCottage").hasClass("button-input-disabled")) {
+						let categoryId = $(e.target).attr('data-id')
+						addCategoryCottage(e, categoryId)
+					}
 				})
 				$("body").on("click", "#sendCategorySauna", () => {
 					if (!$("#sendCategorySauna").hasClass("button-input-disabled"))

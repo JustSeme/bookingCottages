@@ -3,7 +3,7 @@
                 "name": "widget.name",
                 "description": "widget.description",
                 "short_description": "widget.short_description",
-                "version": "1.14.9",
+                "version": "1.14.24",
                 "interface_version": 2,
                 "init_once": false,
                 "locale": [

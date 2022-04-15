@@ -1,0 +1,30 @@
+{
+        "widget": {
+                "name": "widget.name",
+                "description": "widget.description",
+                "short_description": "widget.short_description",
+                "version": "1.14.9",
+                "interface_version": 2,
+                "init_once": false,
+                "locale": [
+                "ru"
+                ],
+                "installation": true
+        },
+        "locations": [
+                "lcard-1",
+                "advanced_settings",
+                "settings",
+                "everywhere"
+        ],
+        "settings": {
+                "data": {
+                "name": "settings.data",
+                "type": "custom",
+                "required": false
+                }
+        },
+        "advanced": {
+                "title": "advanced.title"
+        }
+}

@@ -1768,7 +1768,7 @@ define(["jquery"], function ($) {
 				}
 			)
 
-			function getMonth() {
+			function getMonth(saunaCategoriesData, cottageCategoriesData) {
 				const days = [
 					"Воскресенье",
 					"Понедельник",
@@ -1816,22 +1816,26 @@ define(["jquery"], function ($) {
 					}
 					let dates = layoutDates.join()
 
-					$(".m-table-sauna").append(`
-					<div class="table2__month second-month">
-						<div class="table2__month-header">
-							${getMonthForLayout()}
+					if(saunaCategoriesData != '') {
+						$(".m-table-sauna").append(`
+						<div class="table2__month second-month">
+							<div class="table2__month-header">
+								${getMonthForLayout()}
+							</div>
+							${dates}
 						</div>
-						${dates}
-					</div>
-				`)
-					$(".m-table-cottage").append(`
-					<div class="table2__month">
-						<div class="table2__month-header">
-							${getMonthForLayout()}
+						`)	
+					}
+					if(cottageCategoriesData != '') {
+						$(".m-table-cottage").append(`
+						<div class="table2__month">
+							<div class="table2__month-header">
+								${getMonthForLayout()}
+							</div>
+							${dates}
 						</div>
-						${dates}
-					</div>
-				`)
+						`)
+					}
 				}
 
 				const layoutDates = []
@@ -1889,6 +1893,7 @@ define(["jquery"], function ($) {
 				}
 
 				let res = ``
+				if(cottageCategoriesData == '') return
 				cottageCategoriesData.forEach((item) => {
 					res += `
 					<div class="table2__sidecell table2__sidecell_height_md m-dark-border" title="${item.name}">
@@ -1990,6 +1995,7 @@ define(["jquery"], function ($) {
 				}
 
 				let res = ``
+				if(saunaCategoriesData == '') return
 				saunaCategoriesData.forEach((item) => {
 					res += `
 					<div class="table2__sidecell table2__sidecell_height_md m-dark-border" title="${item.name}">
@@ -2142,7 +2148,7 @@ define(["jquery"], function ($) {
 		</div>
 		<div class="wrap-entity-internal">
 			<div class="cottages__entity-internal">
-				<div class="tariffs-cottage-list">${getTariffsCottageList(hotelTariffs)}</div>
+				<div class="tariffs-cottage-list">${hotelTariffs != '' ? getTariffsCottageList(hotelTariffs) : ''}</div>
 				<div class="button-input" id="addTariff" data-link="-tarif-cottage">Добавить тариф</div>
 				<div class="overlay js-overlay-tarif-cottage">
 					<div class="popup js-popup-tarif-cottage">
@@ -2374,19 +2380,21 @@ define(["jquery"], function ($) {
 
 			$(".price-tariffs__entity").append(res)
 
-			getLeftSideBarSauna(saunaCategoriesData)
-			getLeftSideBarCottage(cottageCategoriesData)
-			getMonth()
+			if(saunaCategoriesData != '') getLeftSideBarSauna(saunaCategoriesData)
+			if(cottageCategoriesData != '') getLeftSideBarCottage(cottageCategoriesData)
+			getMonth(saunaCategoriesData, cottageCategoriesData)
 		}
 
 		async function editWindowCategoryBathhouse(categoryData, bathhouseTariffs) {
 			$(".js-popup-edit-bathhouse").empty()
 			console.log(categoryData[0]);
-			//categoryData[0].facilities = JSON.parse(categoryData[0].facilities)
+			categoryData[0].facilities = JSON.parse(categoryData[0].facilities)
 			let tariffValue
 			if (categoryData[0].tariff_id != 0) {
-				await tariffHotelInfo(categoryData[0].tariff_id).then(
+				await tariffInfo(categoryData[0].tariff_id, 'bathhouse').then(
 					(data) => (tariffValue = data[0].name)
+				).catch(
+					() => (tariffValue = '')
 				)
 			}
 			let res = `
@@ -2416,7 +2424,7 @@ define(["jquery"], function ($) {
 								data-type=""
 								value="${tariffValue != undefined ? tariffValue : ""}" class="tariff_id__bathhouse__input text-input" placeholder="Выберите тариф" />
 							<div class="clear__btn active">&#x2716;</div>
-							${getTariffsList(bathhouseTariffs)}
+							${bathhouseTariffs != '' ? getTariffsList(bathhouseTariffs) : ''}
 						</div>
 					</label>
 					<label for="time_start_work">
@@ -2483,8 +2491,752 @@ define(["jquery"], function ($) {
 					<div class="button-input" id="sendEditCategorySauna">Сохранить</div>
 				</div>
 				<div class="сonveniences-sauna__entity-popup-sauna hidden">
-					<p>Удобства</p>
-				</div>
+										<ul class="conveniences-list-sauna">
+											<li class="conveniences-list-item">
+												<label>
+													<input type="checkbox" class="conveniences-group" data-ploshad="false" data-group-id="1">
+													<span class="checkmark"></span>
+													Вид парной
+												</label>
+												<ul class="conveniences-group-list" data-group="1">
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="1" data-ploshad="false"  data-item-id="1" ${categoryData[0].facilities[0].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%9f%d0%b0%d1%80%d0%bd%d0%b0%d1%8f/russian%20sauna:%20%d1%80%d1%83%d1%81%d1%81%d0%ba%d0%b0%20%d1%81%d0%b0%d1%83%d0%bd%d0%b0.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Русская баня
+															<input class="conveniences_value" type="hidden" name="1-1" data-value-id="1" data-item-type="bool" value="${categoryData[0].facilities[0].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="2" class="conveniences-group-item"  data-item-type="bool" data-item-group="1" data-item-id="2" ${categoryData[0].facilities[1].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%9f%d0%b0%d1%80%d0%bd%d0%b0%d1%8f/hamam:%d1%85%d0%b0%d0%bc%d0%b0%d0%bc.png" class="conveniences-icon conveniences-icon__hamam"></img>
+															Хамам
+															<input class="conveniences_value" type="hidden" name="1-2" data-value-id="2" data-item-type="bool" value="${categoryData[0].facilities[1].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="3" class="conveniences-group-item"  data-item-type="bool" data-item-group="1" data-item-id="3" ${categoryData[0].facilities[2].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%9f%d0%b0%d1%80%d0%bd%d0%b0%d1%8f/Finnish%20sauna:%d1%84%d0%b8%d0%bd%d1%81%d0%ba%d0%b0%d1%8f%20%d1%81%d0%b0%d1%83%d0%bd%d0%b0.png" class="conveniences-icon conveniences-icon__sauna"></img>
+															Финская сауна
+															<input class="conveniences_value" type="hidden" name="1-3" data-value-id="3" data-item-type="bool" value="${categoryData[0].facilities[2].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="4" class="conveniences-group-item"  data-item-type="bool" data-item-group="1" data-item-id="4" ${categoryData[0].facilities[3].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%9f%d0%b0%d1%80%d0%bd%d0%b0%d1%8f/public%20bath:%d0%be%d0%b1%d1%89%d0%b5%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f%20%d0%b1%d0%b0%d0%bd%d1%8f.png" class="conveniences-icon conveniences-icon__public-bath"></img>
+															Общественная баня
+															<input class="conveniences_value" type="hidden" name="1-4" data-value-id="4" data-item-type="bool" value="${categoryData[0].facilities[3].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="5" class="conveniences-group-item"  data-item-type="bool" data-item-group="1" data-item-id="5" ${categoryData[0].facilities[4].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%9f%d0%b0%d1%80%d0%bd%d0%b0%d1%8f/infrared%20sauna:%d0%b8%d0%bd%d1%84%d1%80%d0%b0%d0%ba%d1%80%d0%b0%d1%81%d0%bd%d0%b0%d1%8f%20%d1%81%d0%b0%d1%83%d0%bd%d0%b0.png" class="conveniences-icon conveniences-icon__hamam"></img>
+															Инфракрасная сауна
+															<input class="conveniences_value" type="hidden" name="1-5" data-value-id="5" data-item-type="bool" value="${categoryData[0].facilities[4].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="6" class="conveniences-group-item"  data-item-type="bool" data-item-group="1" data-item-id="6" ${categoryData[0].facilities[5].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%9f%d0%b0%d1%80%d0%bd%d0%b0%d1%8f/wood-fired%20sauna:%d0%b1%d0%b0%d0%bd%d1%8f%20%d0%bd%d0%b0%20%d0%b4%d1%80%d0%be%d0%b2%d0%b0%d1%85.png" class="conveniences-icon conveniences-icon__hamam"></img>
+															Баня на дровах
+															<input class="conveniences_value" type="hidden" name="1-6" data-value-id="6" data-item-type="bool" value="${categoryData[0].facilities[5].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="7" class="conveniences-group-item"  data-item-type="bool" data-item-group="1" data-item-id="7" ${categoryData[0].facilities[6].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%9f%d0%b0%d1%80%d0%bd%d0%b0%d1%8f/Japanese%20bath:%d1%8f%d0%bf%d0%be%d0%bd%d0%ba%d0%b0%d1%8f%20%d0%b1%d0%b0%d0%bd%d1%8f.png" class="conveniences-icon conveniences-icon__hamam"></img>
+															Японская баня
+															<input class="conveniences_value" type="hidden" name="1-7" data-value-id="7" data-item-type="bool" value="${categoryData[0].facilities[6].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="8" class="conveniences-group-item"  data-item-type="bool" data-item-group="1" data-item-id="8" ${categoryData[0].facilities[7].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%9f%d0%b0%d1%80%d0%bd%d0%b0%d1%8f/Roman%20bath:%d1%80%d0%b8%d0%bc%d1%81%d0%ba%d0%b0%d1%8f%20%d0%b1%d0%b0%d0%bd%d1%8f.png" class="conveniences-icon conveniences-icon__hamam"></img>
+															Римская баня
+															<input class="conveniences_value" type="hidden" name="1-8" data-value-id="8" data-item-type="bool" value="${categoryData[0].facilities[7].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="9" class="conveniences-group-item"  data-item-type="bool" data-item-group="1" data-item-id="9" ${categoryData[0].facilities[8].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%9f%d0%b0%d1%80%d0%bd%d0%b0%d1%8f/cryosauna:%d0%ba%d1%80%d0%b8%d0%be%d1%81%d0%b0%d1%83%d0%bd%d0%b0.png"></img>
+															Криосауна
+															<input class="conveniences_value" type="hidden" name="1-9" data-value-id="9" data-item-type="bool" value="${categoryData[0].facilities[8].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="10" class="conveniences-group-item"  data-item-type="bool" data-item-group="1" data-item-id="10" ${categoryData[0].facilities[9].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%9f%d0%b0%d1%80%d0%bd%d0%b0%d1%8f/phytosauna:%d1%84%d0%b8%d1%82%d0%be%d1%81%d0%b0%d1%83%d0%bd%d0%b0.png" class="conveniences-icon conveniences-icon__hamam"></img>
+															Фитосауна
+															<input class="conveniences_value" type="hidden" name="1-10" data-value-id="10" data-item-type="bool" value="${categoryData[0].facilities[9].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="11" class="conveniences-group-item"  data-item-type="bool" data-item-group="1" data-item-id="11" ${categoryData[0].facilities[10].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%9f%d0%b0%d1%80%d0%bd%d0%b0%d1%8f/salt%20room:%d1%81%d0%be%d0%bb%d1%8f%d0%bd%d0%b0%d1%8f%20%d0%ba%d0%be%d0%bc%d0%bd%d0%b0%d1%82%d0%b0.png"></img>
+															Соляная комната
+															<input class="conveniences_value" type="hidden" name="1-11" data-value-id="11" data-item-type="bool" value="${categoryData[0].facilities[10].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="12" class="conveniences-group-item"  data-item-type="bool" data-item-group="1" data-item-id="12" ${categoryData[0].facilities[11].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%9f%d0%b0%d1%80%d0%bd%d0%b0%d1%8f/mobile%20bath:%d0%bc%d0%be%d0%b1%d0%b8%d0%bb%d1%8c%d0%bd%d0%b0%d1%8f%20%d0%b1%d0%b0%d0%bd%d1%8f.png"></img>
+															Мобильная баня
+															<input class="conveniences_value" type="hidden" name="1-12" data-value-id="12" data-item-type="bool" value="${categoryData[0].facilities[11].on}" size="4" min="0">
+														</label>
+													</li>
+												</ul>
+											</li>
+
+											<li class="conveniences-list-item">
+												<label>
+													<input type="checkbox" class="conveniences-group" data-group-id="2">
+													<span class="checkmark"></span>
+													Аквазона
+												</label>
+												<ul class="conveniences-group-list" data-group="2">
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="2" data-item-id="13" ${categoryData[0].facilities[12].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%90%d0%ba%d0%b2%d0%b0%d0%b7%d0%be%d0%bd%d0%b0/swimming%20pool:%d0%b1%d0%b0%d1%81%d1%81%d0%b5%d0%b8%cc%86%d0%bd.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Бассейн
+															<input class="conveniences_value" type="hidden" name="2-1" data-value-id="13" data-item-type="bool" value="${categoryData[0].facilities[12].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="2" class="conveniences-group-item"  data-item-type="bool" data-item-group="2" data-item-id="14" ${categoryData[0].facilities[13].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%90%d0%ba%d0%b2%d0%b0%d0%b7%d0%be%d0%bd%d0%b0/Jacuzzi:%d0%b4%d0%b6%d0%b0%d0%ba%d1%83%d0%b7%d0%b8.png" class="conveniences-icon conveniences-icon__hamam"></img>
+															Джакузи
+															<input class="conveniences_value" type="hidden" name="2-2" data-value-id="14" data-item-type="bool" value="${categoryData[0].facilities[13].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="3" class="conveniences-group-item"  data-item-type="bool" data-item-group="2" data-item-id="15" ${categoryData[0].facilities[14].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%90%d0%ba%d0%b2%d0%b0%d0%b7%d0%be%d0%bd%d0%b0/waterfall:%d0%b2%d0%be%d0%b4%d0%be%d0%bf%d0%b0%d0%b4.png" class="conveniences-icon conveniences-icon__sauna"></img>
+															Водопад
+															<input class="conveniences_value" type="hidden" name="2-3" data-value-id="15" data-item-type="bool" value="${categoryData[0].facilities[14].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="4" class="conveniences-group-item"  data-item-type="bool" data-item-group="2" data-item-id="16" ${categoryData[0].facilities[15].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%90%d0%ba%d0%b2%d0%b0%d0%b7%d0%be%d0%bd%d0%b0/access%20to%20the%20river:lake:%d0%b2%d1%8b%d1%85%d0%be%d0%b4%20%d0%ba%20%d1%80%d0%b5%d0%ba%d0%b5:%d0%be%d0%b7%d0%b5%d1%80%d1%83.png" class="conveniences-icon conveniences-icon__public-bath"></img>
+															Выход к реке/озеру
+															<input class="conveniences_value" type="hidden" name="2-4" data-value-id="16" data-item-type="bool" value="${categoryData[0].facilities[15].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="5" class="conveniences-group-item"  data-item-type="bool" data-item-group="2" data-item-id="17" ${categoryData[0].facilities[16].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%90%d0%ba%d0%b2%d0%b0%d0%b7%d0%be%d0%bd%d0%b0/geyser:%d0%b3%d0%b5%d0%b8%cc%86%d0%b7%d0%b5%d1%80.png" class="conveniences-icon conveniences-icon__hamam"></img>
+															Гейзер
+															<input class="conveniences_value" type="hidden" name="2-5" data-value-id="17" data-item-type="bool" value="${categoryData[0].facilities[16].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="6" class="conveniences-group-item"  data-item-type="bool" data-item-group="2" data-item-id="18" ${categoryData[0].facilities[17].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%90%d0%ba%d0%b2%d0%b0%d0%b7%d0%be%d0%bd%d0%b0/hydromassage:%d0%b3%d0%b8%d0%b4%d1%80%d0%be%d0%bc%d0%b0%d1%81%d1%81%d0%b0%d0%b6.png" class="conveniences-icon conveniences-icon__hamam"></img>
+															Гидромассаж
+															<input class="conveniences_value" type="hidden" name="2-6" data-value-id="18" data-item-type="bool" value="${categoryData[0].facilities[17].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="7" class="conveniences-group-item"  data-item-type="bool" data-item-group="2" data-item-id="19" ${categoryData[0].facilities[18].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%90%d0%ba%d0%b2%d0%b0%d0%b7%d0%be%d0%bd%d0%b0/slide:%d0%b3%d0%be%d1%80%d0%ba%d0%b0.png" class="conveniences-icon conveniences-icon__hamam"></img>
+															Горка
+															<input class="conveniences_value" type="hidden" name="2-7" data-value-id="19" data-item-type="bool" value="${categoryData[0].facilities[18].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="8" class="conveniences-group-item"  data-item-type="bool" data-item-group="2" data-item-id="20" ${categoryData[0].facilities[19].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%90%d0%ba%d0%b2%d0%b0%d0%b7%d0%be%d0%bd%d0%b0/shower:%d0%b4%d1%83%d1%88.png" class="conveniences-icon conveniences-icon__hamam"></img>
+															Душ
+															<input class="conveniences_value" type="hidden" name="2-8" data-value-id="20" data-item-type="bool" value="${categoryData[0].facilities[19].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="9" class="conveniences-group-item"  data-item-type="bool" data-item-group="2" data-item-id="21" ${categoryData[0].facilities[20].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%90%d0%ba%d0%b2%d0%b0%d0%b7%d0%be%d0%bd%d0%b0/font:%d0%ba%d1%83%d0%bf%d0%b5%d0%bb%d1%8c.png"></img>
+															Купель
+															<input class="conveniences_value" type="hidden" name="2-9" data-value-id="21" data-item-type="bool" value="${categoryData[0].facilities[20].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="10" class="conveniences-group-item"  data-item-type="bool" data-item-group="2" data-item-id="22" ${categoryData[0].facilities[21].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%90%d0%ba%d0%b2%d0%b0%d0%b7%d0%be%d0%bd%d0%b0/ice%20pool:%d0%bb%d0%b5%d0%b4%d1%8f%d0%bd%d0%be%d0%b8%cc%86%20%d0%b1%d0%b0%d1%81%d1%81%d0%b5%d0%bd.png" class="conveniences-icon conveniences-icon__hamam"></img>
+															Ледяной бассейн
+															<input class="conveniences_value" type="hidden" name="2-10" data-value-id="22" data-item-type="bool" value="${categoryData[0].facilities[21].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="11" class="conveniences-group-item"  data-item-type="bool" data-item-group="2" data-item-id="23" ${categoryData[0].facilities[22].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%90%d0%ba%d0%b2%d0%b0%d0%b7%d0%be%d0%bd%d0%b0/no%20swimming%20pool:%d0%bd%d0%b5%d1%82%20%d0%b1%d0%b0%d1%81%d1%81%d0%b5%d0%b8%cc%86%d0%bd%d0%b0.png"></img>
+															Нет бассейна
+															<input class="conveniences_value" type="hidden" name="2-11" data-value-id="23" data-item-type="bool" value="${categoryData[0].facilities[22].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="12" class="conveniences-group-item"  data-item-type="bool" data-item-group="2" data-item-id="24" ${categoryData[0].facilities[23].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%90%d0%ba%d0%b2%d0%b0%d0%b7%d0%be%d0%bd%d0%b0/backlight:%d0%bf%d0%be%d0%b4%d1%81%d0%b2%d0%b5%d1%82%d0%ba%d0%b0.png"></img>
+															Подсветка
+															<input class="conveniences_value" type="hidden" name="2-12" data-value-id="24" data-item-type="bool" value="${categoryData[0].facilities[23].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="12" class="conveniences-group-item"  data-item-type="bool" data-item-group="2" data-item-id="25" ${categoryData[0].facilities[24].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%90%d0%ba%d0%b2%d0%b0%d0%b7%d0%be%d0%bd%d0%b0/countercurrent:%d0%bf%d1%80%d0%be%d1%82%d0%b8%d0%b2%d0%be%d1%82%d0%be%d0%ba.png"></img>
+															Противоток
+															<input class="conveniences_value" type="hidden" name="2-13" data-value-id="25" data-item-type="bool" value="${categoryData[0].facilities[24].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="12" class="conveniences-group-item"  data-item-type="bool" data-item-group="2" data-item-id="26" ${categoryData[0].facilities[25].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%90%d0%ba%d0%b2%d0%b0%d0%b7%d0%be%d0%bd%d0%b0/sauna%20with%20sea%20water:%d1%81%d0%b0%d1%83%d0%bd%d0%b0%20%d1%81%20%d0%bc%d0%be%d1%80%d1%81%d0%ba%d0%be%d0%b8%cc%86%20%d0%b2%d0%be%d0%b4%d0%be%d0%b8%cc%86.png"></img>
+															Сауна с морской водой
+															<input class="conveniences_value" type="hidden" name="2-14" data-value-id="26" data-item-type="bool" value="${categoryData[0].facilities[25].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="12" class="conveniences-group-item"  data-item-type="bool" data-item-group="2" data-item-id="27" ${categoryData[0].facilities[26].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%90%d0%ba%d0%b2%d0%b0%d0%b7%d0%be%d0%bd%d0%b0/warm%20swimming%20pool:%d1%82%d0%b5%d0%bf%d0%bb%d1%8b%d0%b8%cc%86%20%d0%b1%d0%b0%d1%81%d1%81%d0%b5%d0%b8%cc%86%d0%bd.png"></img>
+															Тёплый бассейн
+															<input class="conveniences_value" type="hidden" name="2-15" data-value-id="27" data-item-type="bool" value="${categoryData[0].facilities[26].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="12" class="conveniences-group-item"  data-item-type="bool" data-item-group="2" data-item-id="28" ${categoryData[0].facilities[27].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%90%d0%ba%d0%b2%d0%b0%d0%b7%d0%be%d0%bd%d0%b0/tub:%d1%83%d1%88%d0%b0%d1%82.png"></img>
+															Ушат
+															<input class="conveniences_value" type="hidden" name="2-16" data-value-id="28" data-item-type="bool" value="${categoryData[0].facilities[27].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="12" class="conveniences-group-item"  data-item-type="bool" data-item-group="2" data-item-id="29" ${categoryData[0].facilities[28].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%90%d0%ba%d0%b2%d0%b0%d0%b7%d0%be%d0%bd%d0%b0/bath:%d0%b2%d0%b0%d0%bd%d0%bd%d0%b0.png"></img>
+															Ванна
+															<input class="conveniences_value" type="hidden" name="2-17" data-value-id="29" data-item-type="bool" value="${categoryData[0].facilities[28].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="12" class="conveniences-group-item"  data-item-type="bool" data-item-group="2" data-item-id="30" ${categoryData[0].facilities[29].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%90%d0%ba%d0%b2%d0%b0%d0%b7%d0%be%d0%bd%d0%b0/vat:%d1%87%d0%b0%d0%bd.png"></img>
+															Чан
+															<input class="conveniences_value" type="hidden" name="2-18" data-value-id="30" data-item-type="bool" value="${categoryData[0].facilities[29].on}" size="4" min="0">
+														</label>
+													</li>
+												</ul>
+											</li>
+											<li class="conveniences-list-item">
+												<label>
+													<input type="checkbox" class="conveniences-group" data-group-id="3">
+													<span class="checkmark"></span>
+													Сервис
+												</label>
+												<ul class="conveniences-group-list" data-group="3">
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="31" ${categoryData[0].facilities[30].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/steam%20room%20fragrances:%d0%b0%d1%80%d0%be%d0%bc%d0%b0%d1%82%d1%8b%20%d0%b4%d0%bb%d1%8f%20%d0%bf%d0%b0%d1%80%d0%bd%d0%be%d0%b8%cc%86.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Ароматы для парной
+															<input class="conveniences_value" type="hidden" name="3-1" data-value-id="31" data-item-type="bool" value="${categoryData[0].facilities[30].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="32" ${categoryData[0].facilities[31].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/Audio-video%20equipment:%d0%b0%d1%83%d0%b4%d0%b8%d0%be-%d0%b2%d0%b8%d0%b4%d0%b5%d0%be%20%d0%b0%d0%bf%d0%bf%d0%b0%d1%80%d0%b0%d1%82%d1%83%d1%80%d0%b0.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Аудио-видео аппаратура
+															<input class="conveniences_value" type="hidden" name="3-2" data-value-id="32" data-item-type="bool" value="${categoryData[0].facilities[31].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="33" ${categoryData[0].facilities[32].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/banqueting%20hall:%d0%b1%d0%b0%d0%bd%d0%ba%d0%b5%d1%82%d0%bd%d1%8b%d0%b8%cc%86%20%d0%b7%d0%b0%d0%bb.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Банкетный зал
+															<input class="conveniences_value" type="hidden" name="3-3" data-value-id="33" data-item-type="bool" value="${categoryData[0].facilities[32].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="34" ${categoryData[0].facilities[33].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/bath%20accessories:%d0%b1%d0%b0%d0%bd%d0%bd%d1%8b%d0%b5%20%d0%bf%d1%80%d0%b8%d0%bd%d0%b0%d0%b4%d0%bb%d0%b5%d0%b6%d0%bd%d0%be%d1%81%d1%82%d0%b8.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Банные принадлежности
+															<input class="conveniences_value" type="hidden" name="3-4" data-value-id="34" data-item-type="bool" value="${categoryData[0].facilities[33].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="35" ${categoryData[0].facilities[34].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/bar:%d0%b1%d0%b0%d1%80.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Бар
+															<input class="conveniences_value" type="hidden" name="3-5" data-value-id="35" data-item-type="bool" value="${categoryData[0].facilities[34].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="36" ${categoryData[0].facilities[35].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/free%20wifi:%d0%b1%d0%b5%d1%81%d0%bf%d0%bb%d0%b0%d1%82%d1%8b%d0%b8%cc%86%20%d0%b2%d0%b0%d0%b8%cc%86-%d1%84%d0%b0%d0%b8%cc%86.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Бесплатный Wi-Fi
+															<input class="conveniences_value" type="hidden" name="3-6" data-value-id="36" data-item-type="bool" value="${categoryData[0].facilities[35].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="37" ${categoryData[0].facilities[36].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/brooms:%d0%b2%d0%b5%d0%bd%d0%b8%d0%ba%d0%b8.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Веники
+															<input class="conveniences_value" type="hidden" name="3-7" data-value-id="37" data-item-type="bool" value="${categoryData[0].facilities[36].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="38" ${categoryData[0].facilities[37].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/hotel:%d0%b3%d0%be%d1%81%d1%82%d0%b8%d0%bd%d0%b8%d1%86%d0%b0.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Гостиница/гостевой дом
+															<input class="conveniences_value" type="hidden" name="3-8" data-value-id="38" data-item-type="bool" value="${categoryData[0].facilities[37].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="39" ${categoryData[0].facilities[38].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/fireplace:%d0%ba%d0%b0%d0%bc%d0%b8%d0%bd.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Камин
+															<input class="conveniences_value" type="hidden" name="3-9" data-value-id="39" data-item-type="bool" value="${categoryData[0].facilities[38].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="40" ${categoryData[0].facilities[39].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/room%20for%20an%20hour:%d0%ba%d0%be%d0%bc%d0%bd%d0%b0%d1%82%d0%b0%20%d0%bd%d0%b0%20%d1%87%d0%b0%d1%81.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Комната на час
+															<input class="conveniences_value" type="hidden" name="3-10" data-value-id="40" data-item-type="bool" value="${categoryData[0].facilities[39].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="41" ${categoryData[0].facilities[40].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/restroom:%d0%ba%d0%be%d0%bc%d0%bd%d0%b0%d1%82%d0%b0%20%d0%be%d1%82%d0%b4%d1%8b%d1%85%d0%b0.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Комната отдыха
+															<input class="conveniences_value" type="hidden" name="3-11" data-value-id="41" data-item-type="bool" value="${categoryData[0].facilities[40].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="42" ${categoryData[0].facilities[41].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/air%20conditioning:%d0%ba%d0%be%d0%bd%d0%b4%d0%b8%d1%86%d0%b8%d0%be%d0%bd%d0%b5%d1%80.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Кондиционер
+															<input class="conveniences_value" type="hidden" name="3-12" data-value-id="42" data-item-type="bool" value="${categoryData[0].facilities[41].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="43" ${categoryData[0].facilities[42].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/room%20for%20an%20hour:%d0%ba%d0%be%d0%bc%d0%bd%d0%b0%d1%82%d0%b0%20%d0%bd%d0%b0%20%d1%87%d0%b0%d1%81.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Летняя веранда
+															<input class="conveniences_value" type="hidden" name="3-13" data-value-id="43" data-item-type="bool" value="${categoryData[0].facilities[42].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="44" ${categoryData[0].facilities[43].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/brazier:%d0%bc%d0%b0%d0%bd%d0%b3%d0%b0%d0%bb.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Мангал
+															<input class="conveniences_value" type="hidden" name="3-14" data-value-id="44" data-item-type="bool" value="${categoryData[0].facilities[43].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="45" ${categoryData[0].facilities[44].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/mansard:%d0%bc%d0%b0%d0%bd%d1%81%d0%b0%d0%bd%d0%b4%d1%80%d0%b0.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Мансарда
+															<input class="conveniences_value" type="hidden" name="3-15" data-value-id="45" data-item-type="bool" value="${categoryData[0].facilities[44].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="46" ${categoryData[0].facilities[45].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/massage%20chair:%d0%bc%d0%b0%d1%81%d1%81%d0%b0%d0%b6%d0%bd%d0%be%d0%b5%20%d0%ba%d1%80%d0%b5%d1%81%d0%bb%d0%be.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Массажное кресло
+															<input class="conveniences_value" type="hidden" name="3-16" data-value-id="46" data-item-type="bool" value="${categoryData[0].facilities[45].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="47" ${categoryData[0].facilities[46].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/parking:%d0%bf%d0%b0%d1%80%d0%ba%d0%be%d0%b2%d0%ba%d0%b0.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Парковка
+															<input class="conveniences_value" type="hidden" name="3-17" data-value-id="47" data-item-type="bool" value="${categoryData[0].facilities[46].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="48" ${categoryData[0].facilities[47].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/with%20your%20food:%d1%81%d0%be%20%d1%81%d0%b2%d0%be%d0%b5%d0%b8%cc%86%20%d0%b5%d0%b4%d0%be%d0%b8%cc%86.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Со своей едой
+															<input class="conveniences_value" type="hidden" name="3-18" data-value-id="48" data-item-type="bool" value="${categoryData[0].facilities[47].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="49" ${categoryData[0].facilities[48].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/solarium:%d1%81%d0%be%d0%bb%d1%8f%d1%80%d0%b8%d0%b8%cc%86.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Солярий
+															<input class="conveniences_value" type="hidden" name="3-19" data-value-id="49" data-item-type="bool" value="${categoryData[0].facilities[48].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="50" ${categoryData[0].facilities[49].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/bath%20cap:%d1%88%d0%b0%d0%bf%d0%be%d1%87%d0%ba%d0%b0%20%d0%b4%d0%bb%d1%8f%20%d0%b1%d0%b0%d0%bd%d0%b8.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Шапочка для бани
+															<input class="conveniences_value" type="hidden" name="3-20" data-value-id="50" data-item-type="bool" value="${categoryData[0].facilities[49].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="51" ${categoryData[0].facilities[50].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/strip%20podium:%d1%81%d1%82%d1%80%d0%b8%d0%bf%20%d0%bf%d0%be%d0%b4%d0%b8%d1%83%d0%bc.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Стрип-подиум
+															<input class="conveniences_value" type="hidden" name="3-21" data-value-id="51" data-item-type="bool" value="${categoryData[0].facilities[50].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="52" ${categoryData[0].facilities[51].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/bathrobe:%d0%b1%d0%b0%d0%bd%d0%bd%d1%8b%d0%b8%cc%86%20%d1%85%d0%b0%d0%bb%d0%b0%d1%82.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Банный халат
+															<input class="conveniences_value" type="hidden" name="3-22" data-value-id="52" data-item-type="bool" value="${categoryData[0].facilities[51].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="53" ${categoryData[0].facilities[52].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/bed:%d0%ba%d1%80%d0%be%d0%b2%d0%b0%d1%82%d1%8c.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Кровать
+															<input class="conveniences_value" type="hidden" name="3-23" data-value-id="53" data-item-type="bool" value="${categoryData[0].facilities[52].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="54" ${categoryData[0].facilities[53].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/a%20massage%20table:%d0%bc%d0%b0%d1%81%d1%81%d0%b0%d0%b6%d0%bd%d1%8b%d0%b8%cc%86%20%d1%81%d1%82%d0%be%d0%bb.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Массажный стол
+															<input class="conveniences_value" type="hidden" name="3-24" data-value-id="54" data-item-type="bool" value="${categoryData[0].facilities[53].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="55" ${categoryData[0].facilities[54].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%D0%A1%D0%B5%D1%80%D0%B2%D0%B8%D1%81/pole:%D1%88%D0%B5%D1%81%D1%82.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Шест
+															<input class="conveniences_value" type="hidden" name="3-25" data-value-id="55" data-item-type="bool" value="${categoryData[0].facilities[54].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="56" ${categoryData[0].facilities[55].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/summer%20terrace:%d0%bb%d0%b5%d1%82%d0%bd%d1%8f%d1%8f%20%d0%b2%d0%b5%d1%80%d0%b0%d0%bd%d0%b4%d0%b0.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Летняя веранда
+															<input class="conveniences_value" type="hidden" name="3-26" data-value-id="56" data-item-type="bool" value="${categoryData[0].facilities[55].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="3" data-item-id="57" ${categoryData[0].facilities[56].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a1%d0%b5%d1%80%d0%b2%d0%b8%d1%81/towel:%d0%bf%d0%be%d0%bb%d0%be%d1%82%d0%b5%d0%bd%d1%86%d0%b5.png"></img>
+															Полотенце
+															<input class="conveniences_value" type="hidden" name="3-27" data-value-id="57" data-item-type="bool" value="${categoryData[0].facilities[56].on}" size="4" min="0">
+														</label>
+													</li>
+												</ul>
+											</li>
+											<li class="conveniences-list-item">
+												<label>
+													<input type="checkbox" class="conveniences-group" data-group-id="4">
+													<span class="checkmark"></span>
+													Услуги
+												</label>
+												<ul class="conveniences-group-list" data-group="4">
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="4" data-item-id="58" ${categoryData[0].facilities[57].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a3%d1%81%d0%bb%d1%83%d0%b3%d0%b8/water%20aerobics:%d0%b0%d0%ba%d0%b2%d0%b0%d0%b0%d1%8d%d1%80%d0%be%d0%b1%d0%b8%d0%ba%d0%b0.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Аквааэробика
+															<input class="conveniences_value" type="hidden" name="4-1" data-value-id="58" data-item-type="bool" value="${categoryData[0].facilities[57].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="4" data-item-id="59" ${categoryData[0].facilities[58].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a3%d1%81%d0%bb%d1%83%d0%b3%d0%b8/dishes%20on%20the%20grill:%d0%b1%d0%bb%d1%8e%d0%b4%d0%b0%20%d0%bd%d0%b0%20%d0%bc%d0%b0%d0%bd%d0%b3%d0%b0%d0%bb%d0%b5.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Блюда на мангале
+															<input class="conveniences_value" type="hidden" name="4-2" data-value-id="59" data-item-type="bool" value="${categoryData[0].facilities[58].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="4" data-item-id="60" ${categoryData[0].facilities[59].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a3%d1%81%d0%bb%d1%83%d0%b3%d0%b8/hookah:%d0%ba%d0%b0%d0%bb%d1%8c%d1%8f%d0%bd.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Кальян
+															<input class="conveniences_value" type="hidden" name="4-3" data-value-id="60" data-item-type="bool" value="${categoryData[0].facilities[59].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="4" data-item-id="61" ${categoryData[0].facilities[60].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a3%d1%81%d0%bb%d1%83%d0%b3%d0%b8/kitchen:%d0%ba%d1%83%d1%85%d0%bd%d1%8f.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Кухня
+															<input class="conveniences_value" type="hidden" name="4-4" data-value-id="61" data-item-type="bool" value="${categoryData[0].facilities[60].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="4" data-item-id="62" ${categoryData[0].facilities[61].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a3%d1%81%d0%bb%d1%83%d0%b3%d0%b8/massage:%d0%bc%d0%b0%d1%81%d1%81%d0%b0%d0%b6.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Массаж
+															<input class="conveniences_value" type="hidden" name="4-5" data-value-id="62" data-item-type="bool" value="${categoryData[0].facilities[61].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="4" data-item-id="63" ${categoryData[0].facilities[62].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a3%d1%81%d0%bb%d1%83%d0%b3%d0%b8/spa%20salons:%d1%81%d0%bf%d0%b0%20%d1%81%d0%b0%d0%bb%d0%be%d0%bd%d1%8b.png" class="conveniences-icon conveniences-icon__russian"></img>
+															СПА салоны
+															<input class="conveniences_value" type="hidden" name="4-6" data-value-id="63" data-item-type="bool" value="${categoryData[0].facilities[62].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="4" data-item-id="64" ${categoryData[0].facilities[63].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a3%d1%81%d0%bb%d1%83%d0%b3%d0%b8/gym:%d1%82%d1%80%d0%b5%d0%bd%d0%b0%d0%b6%d0%b5%d1%80%d0%bd%d1%8b%d0%b8%cc%86%20%d0%b7%d0%b0%d0%bb.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Тренажерный зал
+															<input class="conveniences_value" type="hidden" name="4-7" data-value-id="64" data-item-type="bool" value="${categoryData[0].facilities[63].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="4" data-item-id="65" ${categoryData[0].facilities[64].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a3%d1%81%d0%bb%d1%83%d0%b3%d0%b8/attendant%20services:%d1%83%d1%81%d0%bb%d1%83%d0%b3%d0%b8%20%d0%b1%d0%b0%d0%bd%d1%89%d0%b8%d0%ba%d0%b0.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Услуги банщика
+															<input class="conveniences_value" type="hidden" name="4-8" data-value-id="65" data-item-type="bool" value="${categoryData[0].facilities[64].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="4" data-item-id="66" ${categoryData[0].facilities[65].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a3%d1%81%d0%bb%d1%83%d0%b3%d0%b8/fitness:%d1%84%d0%b8%d1%82%d0%bd%d0%b5%d1%81.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Фитнес
+															<input class="conveniences_value" type="hidden" name="4-9" data-value-id="66" data-item-type="bool" value="${categoryData[0].facilities[65].on}" size="4" min="0">
+														</label>
+													</li>
+												</ul>
+											</li>
+											<li class="conveniences-list-item">
+												<label>
+													<input type="checkbox" class="conveniences-group" data-group-id="5">
+													<span class="checkmark"></span>
+													Развлечения
+												</label>
+												<ul class="conveniences-group-list" data-group="5">
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="5" data-item-id="67" ${categoryData[0].facilities[66].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a0%d0%b0%d0%b7%d0%b2%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d1%8f/air%20hockey:%d0%b0%d1%8d%d1%80%d0%be%d1%85%d0%be%d0%ba%d0%ba%d0%b5%d0%b8%cc%86.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Аэрохоккей
+															<input class="conveniences_value" type="hidden" name="5-1" data-value-id="67" data-item-type="bool" value="${categoryData[0].facilities[66].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="5" data-item-id="68" ${categoryData[0].facilities[67].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a0%d0%b0%d0%b7%d0%b2%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d1%8f/darts:%d0%b4%d0%b0%d1%80%d1%82%d1%81.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Дартс
+															<input class="conveniences_value" type="hidden" name="5-2" data-value-id="68" data-item-type="bool" value="${categoryData[0].facilities[67].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="5" data-item-id="69" ${categoryData[0].facilities[68].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a0%d0%b0%d0%b7%d0%b2%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d1%8f/playing%20cards:%d0%b8%d0%b3%d1%80%d0%b0%d0%bb%d1%8c%d0%bd%d1%8b%d0%b5%20%d0%ba%d0%b0%d1%80%d1%82%d1%8b.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Игральные карты
+															<input class="conveniences_value" type="hidden" name="5-3" data-value-id="69" data-item-type="bool" value="${categoryData[0].facilities[68].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="5" data-item-id="70" ${categoryData[0].facilities[69].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a0%d0%b0%d0%b7%d0%b2%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d1%8f/karaoke:%d0%ba%d0%b0%d1%80%d0%b0%d0%be%d0%ba%d0%b5.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Караоке
+															<input class="conveniences_value" type="hidden" name="5-4" data-value-id="70" data-item-type="bool" value="${categoryData[0].facilities[69].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="5" data-item-id="71" ${categoryData[0].facilities[70].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a0%d0%b0%d0%b7%d0%b2%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d1%8f/musical%20apparatus:%d0%bc%d1%83%d0%b7%d0%ba%d0%b0%d0%bb%d1%8c%d0%bd%d1%8b%d0%b8%cc%86%20%d0%b0%d0%bf%d0%bf%d0%b0%d1%80%d0%b0%d1%82.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Музыкальный аппарат
+															<input class="conveniences_value" type="hidden" name="5-5" data-value-id="71" data-item-type="bool" value="${categoryData[0].facilities[70].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="5" data-item-id="72" ${categoryData[0].facilities[71].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a0%d0%b0%d0%b7%d0%b2%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d1%8f/backgammon:%d0%bd%d0%b0%d1%80%d0%b4%d1%8b.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Нарды
+															<input class="conveniences_value" type="hidden" name="5-6" data-value-id="72" data-item-type="bool" value="${categoryData[0].facilities[71].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="5" data-item-id="73" ${categoryData[0].facilities[72].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a0%d0%b0%d0%b7%d0%b2%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d1%8f/board%20games:%d0%bd%d0%b0%d1%81%d1%82%d0%be%d0%bb%d1%8c%d0%bd%d1%8b%d0%b5%20%d0%b8%d0%b3%d1%80%d1%8b.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Настольные игры
+															<input class="conveniences_value" type="hidden" name="5-7" data-value-id="73" data-item-type="bool" value="${categoryData[0].facilities[72].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="5" data-item-id="74" ${categoryData[0].facilities[73].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a0%d0%b0%d0%b7%d0%b2%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d1%8f/table%20tennis:%d0%bd%d0%b0%d1%81%d1%82%d0%be%d0%bb%d1%8c%d0%bd%d1%8b%d0%b8%cc%86%20%d1%82%d0%b5%d0%bd%d0%bd%d0%b8%d1%81.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Настольный теннис
+															<input class="conveniences_value" type="hidden" name="5-8" data-value-id="74" data-item-type="bool" value="${categoryData[0].facilities[73].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="5" data-item-id="75" ${categoryData[0].facilities[74].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a0%d0%b0%d0%b7%d0%b2%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d1%8f/table%20football:%d0%bd%d0%b0%d1%81%d1%82%d0%be%d0%bb%d1%8c%d0%bd%d1%8b%d0%b8%cc%86%20%d1%84%d1%83%d1%82%d0%b1%d0%be%d0%bb.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Настольный футбол
+															<input class="conveniences_value" type="hidden" name="5-9" data-value-id="75" data-item-type="bool" value="${categoryData[0].facilities[74].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="5" data-item-id="76" ${categoryData[0].facilities[75].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a0%d0%b0%d0%b7%d0%b2%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d1%8f/table%20hockey:%d0%bd%d0%b0%d1%81%d1%82%d0%be%d0%bb%d1%8c%d0%bd%d1%8b%d0%b8%cc%86%20%d1%85%d0%be%d0%ba%d0%ba%d0%b5%d0%b8%cc%86.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Настольный хоккей
+															<input class="conveniences_value" type="hidden" name="5-10" data-value-id="76" data-item-type="bool" value="${categoryData[0].facilities[75].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="5" data-item-id="77" ${categoryData[0].facilities[76].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a0%d0%b0%d0%b7%d0%b2%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d1%8f/Pool%20american%20billiards:%d0%bf%d1%83%d0%bb%20%d0%b0%d0%bc%d0%b5%d0%b8%d0%ba%d0%b0%d0%bd%d1%81%d0%ba%d0%b8%d0%b8%cc%86%20%d0%b1%d0%b8%d0%bb%d1%8c%d1%8f%d1%80%d0%b4.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Пул американский бильярд
+															<input class="conveniences_value" type="hidden" name="5-11" data-value-id="77" data-item-type="bool" value="${categoryData[0].facilities[76].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="5" data-item-id="78" ${categoryData[0].facilities[77].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%a0%d0%b0%d0%b7%d0%b2%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d1%8f/Russian%20billiards:%d1%80%d1%83%d1%81%d1%81%d0%ba%d0%b8%d0%b8%cc%86%20%d0%b1%d0%b8%d0%bb%d1%8c%d1%8f%d1%80%d0%b4.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Русский бильярд
+															<input class="conveniences_value" type="hidden" name="5-12" data-value-id="78" data-item-type="bool" value="${categoryData[0].facilities[77].on}" size="4" min="0">
+														</label>
+													</li>
+												</ul>
+											</li>
+											<li class="conveniences-list-item">
+												<label>
+													<input type="checkbox" class="conveniences-group" data-group-id="6">
+													<span class="checkmark"></span>
+													Вид на
+												</label>
+												<ul class="conveniences-group-list" data-group="6">
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="6" data-item-id="79" ${categoryData[0].facilities[78].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%92%d0%b8%d0%b4%20%d0%bd%d0%b0/city:%d0%b3%d0%be%d1%80%d0%be%d0%b4.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Город
+															<input class="conveniences_value" type="hidden" name="6-1" data-value-id="79" data-item-type="bool" value="${categoryData[0].facilities[78].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="6" data-item-id="80" ${categoryData[0].facilities[79].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%92%d0%b8%d0%b4%20%d0%bd%d0%b0/courtyard:%d0%b4%d0%b2%d0%be%d1%80.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Двор
+															<input class="conveniences_value" type="hidden" name="6-2" data-value-id="80" data-item-type="bool" value="${categoryData[0].facilities[79].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="6" data-item-id="81" ${categoryData[0].facilities[80].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%92%d0%b8%d0%b4%20%d0%bd%d0%b0/garden,%20forest:%d1%81%d0%b0%d0%b4,%d0%bb%d0%b5%d1%81.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Сад, лес
+															<input class="conveniences_value" type="hidden" name="6-3" data-value-id="81" data-item-type="bool" value="${categoryData[0].facilities[80].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="6" data-item-id="82" ${categoryData[0].facilities[81].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%92%d0%b8%d0%b4%20%d0%bd%d0%b0/lake:%d0%be%d0%b7%d0%b5%d1%80%d0%be.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Озеро
+															<input class="conveniences_value" type="hidden" name="6-4" data-value-id="82" data-item-type="bool" value="${categoryData[0].facilities[81].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="6" data-item-id="83" ${categoryData[0].facilities[82].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%92%d0%b8%d0%b4%20%d0%bd%d0%b0/mountains:%d0%b3%d0%be%d1%80%d1%8b.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Горы
+															<input class="conveniences_value" type="hidden" name="6-5" data-value-id="83" data-item-type="bool" value="${categoryData[0].facilities[82].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="6" data-item-id="84" ${categoryData[0].facilities[83].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%92%d0%b8%d0%b4%20%d0%bd%d0%b0/" class="conveniences-icon conveniences-icon__russian"></img>
+															Река
+															<input class="conveniences_value" type="hidden" name="6-6" data-value-id="84" data-item-type="bool" value="${categoryData[0].facilities[83].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="6" data-item-id="85" ${categoryData[0].facilities[84].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%92%d0%b8%d0%b4%20%d0%bd%d0%b0/sea:%d0%bc%d0%be%d1%80%d0%b5.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Море
+															<input class="conveniences_value" type="hidden" name="6-7" data-value-id="85" data-item-type="bool" value="${categoryData[0].facilities[84].on}" size="4" min="0">
+														</label>
+													</li>
+													<li>
+														<label>
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="6" data-item-id="86" ${categoryData[0].facilities[85].on == 'true' ? 'checked' : ''}>
+															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%92%d0%b8%d0%b4%20%d0%bd%d0%b0/swimming%20pool:%d0%b1%d0%b0%d1%81%d1%81%d0%b8%cc%86%d0%bd.png" class="conveniences-icon conveniences-icon__russian"></img>
+															Бассейн
+															<input class="conveniences_value" type="hidden" name="6-8" data-value-id="86" data-item-type="bool" value="${categoryData[0].facilities[85].on}" size="4" min="0">
+														</label>
+													</li>
+												</ul>
+											</li>
+										</ul>
+									</div>
 				<div class="photos-sauna__entity-popup-sauna hidden">
 					<div class="form__item">
 						<div class="form__label">Фотографии сауны</div> 
@@ -2522,8 +3274,10 @@ define(["jquery"], function ($) {
 			categoryData[0].facilities = JSON.parse(categoryData[0].facilities)
 			let tariffValue
 			if (categoryData[0].tariff_id != 0) {
-				await tariffHotelInfo(categoryData[0].tariff_id).then(
+				await tariffInfo(categoryData[0].tariff_id, 'hotel').then(
 					(data) => (tariffValue = data[0].name)
+				).catch(
+					() => (tariffValue = '')
 				)
 			}
 			let res = `
@@ -2574,7 +3328,7 @@ define(["jquery"], function ($) {
 									tariffValue != undefined ? tariffValue : ""
 								}"/>
 							<div class="clear__btn active">&#x2716;</div>
-							${getTariffsList(hotelTariffs, categoryData[0].tariff_id)}
+							${hotelTariffs != '' ? getTariffsList(hotelTariffs, categoryData[0].tariff_id) : ''}
 						</div>
 					</label>
 					<label for="time_arrival">
@@ -3448,6 +4202,7 @@ define(["jquery"], function ($) {
 
 			function getCategoriesCottageList(cottageCategoriesData) {
 				let res = ``
+				if(cottageCategoriesData == '') return ''
 				cottageCategoriesData.forEach((item) => {
 					res += `
 					<div class="categories-cottage-list__container entity-list">
@@ -3462,6 +4217,7 @@ define(["jquery"], function ($) {
 
 			function getCategoriesSaunaList(saunaCategoriesData) {
 				let res = ``
+				if(saunaCategoriesData == '') return ''
 				saunaCategoriesData.forEach((item) => {
 					res += `
 					<div class="categories-sauna-list__container entity-list">
@@ -3541,7 +4297,7 @@ define(["jquery"], function ($) {
 												<input type="text" name="tariff_id__cottage" data-id=""
 													data-type="" class="tariffs__input text-input" placeholder="Выберите тариф" />
 												<div class="clear__btn active">&#x2716;</div>
-												${getTariffsList(hotelTariffs)}
+												${hotelTariffs != '' ? getTariffsList(hotelTariffs) : ''}
 											</div>
 										</label>
 										<label for="time_arrival">
@@ -4186,7 +4942,7 @@ define(["jquery"], function ($) {
 													data-type=""
 													value="" class="tariff_id__bathhouse__input text-input" placeholder="Выберите тариф" />
 												<div class="clear__btn active">&#x2716;</div>
-												${getTariffsList(bathhouseTariffs)}
+												${bathhouseTariffs != '' ? getTariffsList(bathhouseTariffs) : ''}
 											</div>
 										</label>
 										<label for="time_start_work">
@@ -4256,18 +5012,17 @@ define(["jquery"], function ($) {
 										<ul class="conveniences-list-sauna">
 											<li class="conveniences-list-item">
 												<label>
-													<input type="checkbox" class="conveniences-group" data-group-id="1">
+													<input type="checkbox" class="conveniences-group" data-ploshad="false" data-group-id="1">
 													<span class="checkmark"></span>
 													Вид парной
 												</label>
 												<ul class="conveniences-group-list" data-group="1">
 													<li>
 														<label>
-															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="1" data-item-id="1">
+															<input type="checkbox" value="1" class="conveniences-group-item"  data-item-type="bool" data-item-group="1" data-ploshad="false"  data-item-id="1">
 															<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/bathhouse/%d0%9f%d0%b0%d1%80%d0%bd%d0%b0%d1%8f/russian%20sauna:%20%d1%80%d1%83%d1%81%d1%81%d0%ba%d0%b0%20%d1%81%d0%b0%d1%83%d0%bd%d0%b0.png" class="conveniences-icon conveniences-icon__russian"></img>
 															Русская баня
 															<input class="conveniences_value" type="hidden" name="1-1" data-value-id="1" data-item-type="bool" value="false" size="4" min="0">
-															m2
 														</label>
 													</li>
 													<li>
@@ -5116,7 +5871,7 @@ define(["jquery"], function ($) {
 		</div>
 		`
 
-			if($(e.target).is('.time-block-wrap')) {
+			if($(e.target).is('#addTimeBlock')) {
 				$(".time-block-wrap").append(addTimeBlockHtml)
 			} else $('.time-block-wrap-edit').append(addTimeBlockHtml)
 		}
@@ -5145,11 +5900,7 @@ define(["jquery"], function ($) {
 		}
 
 		function getTariffsList(tariffs, selectedId = "", multiSelect = false) {
-			let res = `
-		<ul class="custom__list hidden custom-scroll ${
-			multiSelect ? "multi-select" : ""
-		}">
-		`
+			let res = `<ul class="custom__list hidden custom-scroll ${multiSelect ? "multi-select" : ""}">`
 
 			tariffs.forEach((tariff) => {
 				let selected = selectedId.includes(tariff.tariff_id) ? "selected" : ""
@@ -5339,7 +6090,7 @@ define(["jquery"], function ($) {
 				alert("Ключевые поля не заполнены")
 			} else {
 				let body = {
-					facilities: {},
+					facilities: [],
 					blocked_periods: timeBlockFunc(),
 					photos: {},
 				}
@@ -5375,9 +6126,7 @@ define(["jquery"], function ($) {
 						if (name == "name") nameForLayout = value
 						body[name] = value
 					} else if (name == "tariff_id__bathhouse") {
-						let tariff_id = $(
-							`.tariff_id__bathhouse__input[name="${name}"]`
-						).attr("data-id")
+						let tariff_id = $(`.tariff_id__bathhouse__input[name="${name}"]`).attr("data-id")
 						body["tariff_id"] = Number(tariff_id)
 					} else if (name == "min_guests" || name == "max_guests") {
 						body[name] = Number(value)
@@ -5389,10 +6138,15 @@ define(["jquery"], function ($) {
 						name == "blocked_periods"
 					) {
 					} else {
-						body["facilities"][name] = String(value)
+						let obj = {
+							id: name,
+							on: String(value),
+						}
+						body["facilities"].push(obj)
 					}
 				}
 
+				body['facilities'] = JSON.stringify(body['facilities'])
 				body = JSON.stringify(body)
 				saveCategoryBathhouseRequest(body).then((response) => {
 					$(".description-sauna__entity-popup-sauna").append(
@@ -5759,20 +6513,20 @@ define(["jquery"], function ($) {
 			})
 		}
 
-		function tariffHotelInfo(tariffId) {
-			return new Promise((resolve) => {
+		function tariffInfo(tariffId, typeData) {
+			return new Promise((resolve, reject) => {
 				$.ajax({
 					type: "GET",
 					url:
 						"https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/get_tariffs.php?id=" +
 						AMOCRM.constant("account").id +
-						`&type_data=hotel&type_request=object&tariff_id=${tariffId}&with`,
+						`&type_data=${typeData}&type_request=object&tariff_id=${tariffId}&with`,
 					dataType: "json",
 					success: (response) => {
 						resolve(response)
 					},
 					error: function (err) {
-						console.debug(err)
+						reject(err)
 					},
 				})
 			})
@@ -5861,7 +6615,7 @@ define(["jquery"], function ($) {
 		}
 
 		function cottageCategories(accountIdAmo) {
-			return new Promise((resolve) => {
+			return new Promise((resolve, reject) => {
 				$.ajax({
 					type: "GET",
 					url:
@@ -5873,14 +6627,14 @@ define(["jquery"], function ($) {
 						resolve(response)
 					},
 					error: function (err) {
-						console.debug(err)
+						reject(err)
 					},
 				})
 			})
 		}
 
 		function saunaCategories(accountIdAmo) {
-			return new Promise((resolve) => {
+			return new Promise((resolve, reject) => {
 				$.ajax({
 					type: "GET",
 					url:
@@ -5892,14 +6646,14 @@ define(["jquery"], function ($) {
 						resolve(response)
 					},
 					error: function (err) {
-						console.debug(err)
+						reject(err)
 					},
 				})
 			})
 		}
 
 		function getSettingsData(accountIdAmo) {
-			return new Promise((resolve) => {
+			return new Promise((resolve, reject) => {
 				$.ajax({
 					type: "GET",
 					url:
@@ -5910,14 +6664,14 @@ define(["jquery"], function ($) {
 						resolve(response)
 					},
 					error: function (err) {
-						console.debug(err)
+						reject(err)
 					},
 				})
 			})
 		}
 
 		function getTariffsBathhouseData(accountIdAmo) {
-			return new Promise((resolve) => {
+			return new Promise((resolve, reject) => {
 				$.ajax({
 					type: "GET",
 					url:
@@ -5929,14 +6683,14 @@ define(["jquery"], function ($) {
 						resolve(response)
 					},
 					error: function (err) {
-						console.debug(err)
+						reject(err)
 					},
 				})
 			})
 		}
 
 		function getTariffsHotelData(accountIdAmo) {
-			return new Promise((resolve) => {
+			return new Promise((resolve, reject) => {
 				$.ajax({
 					type: "GET",
 					url:
@@ -5948,7 +6702,7 @@ define(["jquery"], function ($) {
 						resolve(response)
 					},
 					error: function (err) {
-						console.debug(err)
+						reject(err)
 					},
 				})
 			})
@@ -6190,22 +6944,33 @@ define(["jquery"], function ($) {
 		async function initAdvancedSettings() {
 			await cottageCategories(AMOCRM.constant("account").id).then(
 				(data) => (cottageCategoriesData = data)
+			).catch(
+				() => (cottageCategoriesData = '')
 			)
 			await saunaCategories(AMOCRM.constant("account").id).then(
 				(data) => (saunaCategoriesData = data)
+			).catch(
+				() => (saunaCategoriesData = '')
 			)
-
 			await getTariffsBathhouseData(AMOCRM.constant("account").id).then(
 				(data) => (bathhouseTariffs = data)
+			).catch(
+				() => (bathhouseTariffs = '')
 			)
 			await getTariffsHotelData(AMOCRM.constant("account").id).then(
 				(data) => (hotelTariffs = data)
+			).catch(
+				() => (hotelTariffs = '')
 			)
 
 			await getGeneralSettings(AMOCRM.constant("account").id).then(
 				(value) => (data = value)
+			).catch(
+				(err) => (console.log(err))
 			)
-			await getPipelines().then((data) => (pipelines = data))
+			await getPipelines().then((data) => (pipelines = data)).catch(
+				(err) => (console.log(err))
+			)
 
 			getAdvancedSettings(
 				data,
@@ -6220,13 +6985,19 @@ define(["jquery"], function ($) {
 		async function initTariffsSettings() {
 			await cottageCategories(AMOCRM.constant("account").id).then(
 				(data) => (cottageCategoriesData = data)
+			).catch(
+				() => (cottageCategoriesData = '')
 			)
 
 			await getTariffsBathhouseData(AMOCRM.constant("account").id).then(
 				(data) => (bathhouseTariffs = data)
+			).catch(
+				() => (bathhouseTariffs = '')
 			)
 			await getTariffsHotelData(AMOCRM.constant("account").id).then(
 				(data) => (hotelTariffs = data)
+			).catch(
+				() => (hotelTariffs = '')
 			)
 
 			getPriceTariffs(cottageCategoriesData, bathhouseTariffs, hotelTariffs)
@@ -6454,13 +7225,13 @@ define(["jquery"], function ($) {
 				$("body").on("change", ".conveniences-group-item", function (e) {
 					let valueItem = $(e.target).attr("data-item-id")
 					if ($(this).is(":checked")) {
-						if ($(this).attr("data-item-id") == 1) {
+						if ($(this).attr("data-item-id") == 1 && $(this).attr('data-ploshad') != 'false') {
 							$(`.conveniences_value[data-value-id="${valueItem}"]`).removeAttr("hidden")
 						} else {
 							$(`.conveniences_value[data-value-id="${valueItem}"]`).val("true")
 						}
 					} else {
-						if ($(this).attr("data-item-id") == 1) {
+						if ($(this).attr("data-item-id") == 1 && $(this).attr('data-ploshad') != 'false') {
 							$(`.conveniences_value[data-value-id="${valueItem}"]`).attr("hidden", "true")
 						} else {
 							$(`.conveniences_value[data-value-id="${valueItem}"]`).val("false")
@@ -6471,7 +7242,9 @@ define(["jquery"], function ($) {
 				$("body").on("change", ".conveniences-group", function (e) {
 					let valueGroup = $(e.target).attr("data-group-id")
 					if ($($(this)).is(":checked")) {
-						if (valueGroup == 1) $(`.conveniences_value[data-value-id="1"]`).removeAttr("hidden")
+						if (valueGroup == 1 && $(this).attr('data-ploshad') != 'false') {
+							$(`.conveniences_value[data-value-id="1"]`).removeAttr("hidden")
+						}
 
 						$(`.conveniences-group-item[data-item-group="${valueGroup}"]`).prop("checked", "true")
 
@@ -6480,7 +7253,9 @@ define(["jquery"], function ($) {
 							$(`[data-value-id="${dataItemId}"]`).val("true")
 						}
 					} else {
-						if (valueGroup == 1)$(`.conveniences_value[data-value-id="1"]`).attr("hidden", "true")
+						if (valueGroup == 1 && $(this).attr('data-ploshad') != 'false') { 
+							$(`.conveniences_value[data-value-id="1"]`).attr("hidden", "true")
+						}
 
 						$(`.conveniences-group-item[data-item-group="${valueGroup}"]`).removeAttr("checked")
 

@@ -1338,8 +1338,8 @@ define(["jquery"], function ($) {
 					width: 193px;
 					z-index: 8;
 					background-color: #FFFFFF;
-					border: 1px solid rgba(0,0,0,0.3);
-					border-right: 1px solid #dfdfdf;
+					border-left: 1px solid rgba(0,0,0,0.3);
+					border-bottom: 1px solid rgba(0,0,0,0.3);
 				}
 				.${w_code} .table2__corner {
 					padding: 24px;
@@ -1355,7 +1355,8 @@ define(["jquery"], function ($) {
 					font-weight: bold;
 					font-size: 14px;
 					background: #fff;
-					border-right: 1px solid #dfdfdf;
+					height: 18px;
+					border-top: 1px solid rgba(0,0,0,0.3);
 				}
 				.${w_code} .table2__sidecell_height_md {
 					height: 50px;
@@ -1510,7 +1511,7 @@ define(["jquery"], function ($) {
 					position:absolute;
 					bottom:0;
 				}
-				.${w_code} #changePriceForPeriod {
+				.${w_code} .change-price-for-period {
 					cursor: pointer;
 					width: 30%;
 					margin: 10px;
@@ -1532,13 +1533,9 @@ define(["jquery"], function ($) {
 					flex-direction: row;
 					width: 
 				}
-				.${w_code} .js-overlay-tarif-sauna-internal {
-					min-width: 80%;
-					min-height: 60%;
-				}
 				.${w_code} .js-popup-tarif-sauna-internal {
-					width: 100%;
-					height: 120%;
+					width: 95%;
+					height: 85%;
 				}
 				.${w_code} .js-popup-tarif-cottage-internal {
 					width: 95%;
@@ -1566,10 +1563,25 @@ define(["jquery"], function ($) {
 					margin: 10px;
 					padding: 10px;
 				}
+				.${w_code} .saved-container-sauna {
+					position: absolute;
+					right: 5px;
+					bottom: 5px;
+					display: flex;
+					flex-direction: row;
+				}
+				.${w_code} .saved-container-sauna .successText {
+					z-index: 100;
+					margin: 10px;
+					padding: 10px;
+				}
 				.${w_code} .title-tariff-input {
 					margin-right: auto;
 				}
 				.${w_code} .edit {
+					cursor: pointer;
+				}
+				.${w_code} .blocked_periods__input {
 					cursor: pointer;
 				}
 			</style>`,
@@ -1878,7 +1890,7 @@ define(["jquery"], function ($) {
 				}
 			}
 
-			function getLeftSideBarCottage(cottageCategoriesData) {
+			function getLeftSideBarCottage(cottageCategoriesData, saunaCategoriesData) {
 				function getFormattedDate(j) {
 					let date = new Date()
 					let str =
@@ -1906,6 +1918,13 @@ define(["jquery"], function ($) {
 					$(".table2__body__cottage-internal").append(
 						'<tr class="table2__row table2__row_height_md js-table2__row__cottage-internal"></tr>'
 					)
+
+					$(".table2__body__sauna").append(
+						'<tr class="table2__row table2__row_height_md js-table2__row__sauna"></tr>'
+					)
+					$(".table2__body__sauna-internal").append(
+						'<tr class="table2__row table2__row_height_md js-table2__row__sauna-internal"></tr>'
+					)
 				})
 
 				for (let i = 0; i < $(".js-table2__row__cottage").length; i++) {
@@ -1922,8 +1941,24 @@ define(["jquery"], function ($) {
 					}
 				}
 
+				for (let i = 0; i < $(".js-table2__row__sauna").length; i++) {
+					for (let j = 0; j < 30; j++) {
+						$($(".js-table2__row__sauna")[i]).append(`
+						<td class="table2__cell m-price">
+							<div class="table2__price">
+								<input style="display: flex;" type="number" name="price[${i}][${j}]" class="table2__input m-third status m-green-light" data-category="${saunaCategoriesData[i].category_id}" data-date="${getFormattedDate(j)}" value="">
+							</div>
+						</td>
+					`)
+					}
+				}
+
 				$(".table2__body__cottage-internal").append(
 					'<tr class="table2__row table2__row_height_md js-table2__row__cottage-internal"></tr>'
+				)
+
+				$(".table2__body__sauna-internal").append(
+					'<tr class="table2__row table2__row_height_md js-table2__row__sauna-internal"></tr>'
 				)
 
 				for (let i = 0; i < $(".js-table2__row__cottage").length + 1; i++) {
@@ -1968,6 +2003,56 @@ define(["jquery"], function ($) {
 							<div class="table2__price">
 								<input style="display: flex;" type="number" name="price-period[${i}][${j}]" class="table2__input m-third status m-green-light" data-week="${dayOfTheWeek}" data-category-period="${
 								cottageCategoriesData[i - 1].category_id
+							}" value="">
+							</div>
+						</td>
+						`)
+						}
+					}
+				}
+
+				for (let i = 0; i < $(".js-table2__row__sauna").length + 1; i++) {
+					for (let j = 0; j < 8; j++) {
+						let dayOfTheWeek
+						switch (j) {
+							case 0:
+								dayOfTheWeek = "monday"
+								break
+							case 1:
+								dayOfTheWeek = "tuesday"
+								break
+							case 2:
+								dayOfTheWeek = "wednesday"
+								break
+							case 3:
+								dayOfTheWeek = "thursday"
+								break
+							case 4:
+								dayOfTheWeek = "friday"
+								break
+							case 5:
+								dayOfTheWeek = "saturday"
+								break
+							case 6:
+								dayOfTheWeek = "sunday"
+								break
+							case 7:
+								dayOfTheWeek = "allDays"
+						}
+						if (i === 0) {
+							$($(".js-table2__row__sauna-internal")[i]).append(`
+						<td class="table2__cell m-price">
+							<div class="table2__price">
+								<input style="display: flex;" type="number" name="price-period[${i}][${j}]" class="table2__input m-third status m-green-light" data-week="${dayOfTheWeek}" data-category-period="allCategories" value="">
+							</div>
+						</td>
+						`)
+						} else {
+							$($(".js-table2__row__sauna-internal")[i]).append(`
+						<td class="table2__cell m-price">
+							<div class="table2__price">
+								<input style="display: flex;" type="number" name="price-period[${i}][${j}]" class="table2__input m-third status m-green-light" data-week="${dayOfTheWeek}" data-category-period="${
+								saunaCategoriesData[i - 1].category_id
 							}" value="">
 							</div>
 						</td>
@@ -2158,7 +2243,7 @@ define(["jquery"], function ($) {
 								Название тарифа:&nbsp;
 								<input align="right" type="text" class="text-input title-tariff-input _req" name="name" placeholder="Введите текст">
 							</label>
-							<div class="button-input_blue" data-link="cottage" id="changePriceForPeriod">Изменить цены на период</div>
+							<div class="button-input_blue change-price-for-period" data-link="cottage" id="changePriceForPeriod">Изменить цены на период</div>
 							<div class="table2 m-dark-border table2_near-dependent">
 								<div class="table2__sidebar" style="margin-left: 0px;">
 									<div class="table2__corner table2__fixed">
@@ -2190,177 +2275,106 @@ define(["jquery"], function ($) {
 					</div>
 				</div>
 				<div class="overlay js-overlay-tarif-cottage-internal">
-								<div class="popup js-popup-tarif-cottage-internal">
-									<div class="close-popup js-close-popup-tarif-cottage-internal">&#10006;</div>
-									<div class="form__period-cottage">
-										<div class="form__period__item">
-											<label for="from">
-												<input class="date_field empty date-cottage _req" name="from" type="date" maxlength="10" value placeholder="Выберите дату">
-											</label>
-											&nbsp;
-											<span>—</span>
-											&nbsp;
-											<label for="to">
-												<input class="date_field empty date-cottage _req" name="to" type="date" maxlength="10" value placeholder="Выберите дату">
-											</label>
+					<div class="popup js-popup-tarif-cottage-internal">
+						<div class="close-popup js-close-popup-tarif-cottage-internal">&#10006;</div>
+						<div class="form__period-cottage">
+							<div class="form__period__item">
+								<label for="from">
+									<input class="date_field empty date-cottage _req" name="from" type="date" maxlength="10" value placeholder="Выберите дату">
+								</label>
+								&nbsp;
+								<span>—</span>
+								&nbsp;
+								<label for="to">
+									<input class="date_field empty date-cottage _req" name="to" type="date" maxlength="10" value placeholder="Выберите дату">
+								</label>
+							</div>
+						</div>
+						<div class="button-input" id="addPeriod" data-link="cottage">Добавить период</div>
+						<div class="table3 m-dark-border table2_near-dependent">
+							<div class="table3__sidebar m-dark-border" style="margin-left: 0px;">
+								<div class="table3__corner table2__fixed">
+									<span>Категории номеров</span>
+								</div>
+								<div class="table2__sidecell table2__sidecell_height_md m-dark-border" title="allCategories">
+									Все категории
+								</div>
+								<div class="table2__fixedData m-dark-border" id="leftSideBarCottageInternal">
+							
+								</div>
+								<div class="table3__layout">
+								<div class="table3__head table2__fixed">
+									<div class="grid m-table-cottage-internal">
+										<div class="table2__month">
+											<div class="table2__dates">
+												<span class="table2__date">пн</span>
+											</div>
+											<div class="table2__dates">
+												<span class="table2__date">вт</span>
+											</div>
+											<div class="table2__dates">
+												<span class="table2__date">ср</span>
+											</div>
+											<div class="table2__dates">
+												<span class="table2__date">чт</span>
+											</div>
+											<div class="table2__dates">
+												<span class="table2__date">пт</span>
+											</div>
+											<div class="table2__dates">
+												<span class="table2__date">сб</span>
+											</div>
+											<div class="table2__dates">
+												<span class="table2__date">вс</span>
+											</div>
+											<div class="table2__dates">
+												<span class="table2__date">все дни</span>
+											</div>
 										</div>
 									</div>
-									<div class="button-input" id="addPeriod" data-link="cottage">Добавить период</div>
-									<div class="table3 m-dark-border table2_near-dependent">
-										<div class="table3__sidebar m-dark-border" style="margin-left: 0px;">
-											<div class="table3__corner table2__fixed">
-												<span>Категории номеров</span>
-											</div>
-											<div class="table2__sidecell table2__sidecell_height_md m-dark-border" title="allCategories">
-												Все категории
-											</div>
-											<div class="table2__fixedData m-dark-border" id="leftSideBarCottageInternal">
-										
-											</div>
-											<div class="table3__layout">
-											<div class="table3__head table2__fixed">
-												<div class="grid m-table-cottage-internal">
-													<div class="table2__month">
-														<div class="table2__dates">
-															<span class="table2__date">пн</span>
-														</div>
-														<div class="table2__dates">
-															<span class="table2__date">вт</span>
-														</div>
-														<div class="table2__dates">
-															<span class="table2__date">ср</span>
-														</div>
-														<div class="table2__dates">
-															<span class="table2__date">чт</span>
-														</div>
-														<div class="table2__dates">
-															<span class="table2__date">пт</span>
-														</div>
-														<div class="table2__dates">
-															<span class="table2__date">сб</span>
-														</div>
-														<div class="table2__dates">
-															<span class="table2__date">вс</span>
-														</div>
-														<div class="table2__dates">
-															<span class="table2__date">все дни</span>
-														</div>
-													</div>
-												</div>
-												<div class="table2__data table2__fixedData">
-													<table class="table2__table">
-														<tbody class="table2__body__cottage-internal">
+									<div class="table2__data table2__fixedData">
+										<table class="table2__table">
+											<tbody class="table2__body__cottage-internal">
 
-														</tbody>
-													</table>
-												</div>
-											</div>
-										</div>
-										</div>
+											</tbody>
+										</table>
 									</div>
 								</div>
 							</div>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 			<div class="sauna__entity-internal hidden">
 			<div class="tariffs-sauna-list">${getTariffsSaunaList(bathhouseTariffs)}</div>
 				<div class="button-input" id="addTariff" data-link="-tarif-sauna">Добавить тариф</div>
 				<div class="overlay js-overlay-tarif-sauna">
-				<div class="popup js-popup-tarif-sauna">
-					<form action="#" method="post" id="tariffFormSauna" class="form-tariff" accept-charset="utf-8">
-						<div class="close-popup js-close-popup-tarif-sauna">&#10006;</div>
-						<div class="overlay js-overlay-tarif-sauna-internal">
-							<div class="popup js-popup-tarif-sauna-internal">
-								<div class="close-popup js-close-popup-tarif-sauna-internal">&#10006;</div>
-								<div class="form__period-sauna">
-									<div class="form__period__item">
-										<label for="from">
-											${periodFrom}
-										</label>
-										&nbsp;
-										<span>—</span>
-										&nbsp;
-										<label for="to">
-											${periodUpTo}
-										</label>
-									</div>
-								</div>
-								<div class="button-input" id="addPeriod" data-link="sauna">Добавить период</div>
-								<div class="table3 m-dark-border table2_near-dependent">
-									<div class="table3__sidebar m-dark-border" style="margin-left: 0px;">
-										<div class="table3__corner table2__fixed">
-											<span>Категории номеров</span>
-										</div>
-										<div class="table2__sidecell table2__sidecell_height_md m-dark-border" title="allCategories">
-											Все категории
-										</div>
-										<div class="table2__fixedData m-dark-border" id="leftSideBarSaunaInternal">
-										
-										</div>
-										<div class="table3__layout">
-											<div class="table3__head table2__fixed">
-												<div class="grid m-table-sauna-internal">
-													<div class="table2__month">
-														<div class="table2__dates">
-															<span class="table2__date">пн</span>
-														</div>
-														<div class="table2__dates">
-															<span class="table2__date">вт</span>
-														</div>
-														<div class="table2__dates">
-															<span class="table2__date">ср</span>
-														</div>
-														<div class="table2__dates">
-															<span class="table2__date">чт</span>
-														</div>
-														<div class="table2__dates">
-															<span class="table2__date">пт</span>
-														</div>
-														<div class="table2__dates">
-															<span class="table2__date">сб</span>
-														</div>
-														<div class="table2__dates">
-															<span class="table2__date">вс</span>
-														</div>
-														<div class="table2__dates">
-															<span class="table2__date">все дни</span>
-														</div>
-													</div>
-												</div>
-												<div class="table2__data table2__fixedData">
-													<table class="table2__table">
-														<tbody class="table2__body-internal">
-
-														</tbody>
-													</table>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-							<label for="tariffSaunaName">
+					<div class="popup js-popup-tarif-sauna">
+						<form action="#" method="post" id="tariffFormSauna" class="form-tariff" accept-charset="utf-8">
+							<div class="close-popup js-close-popup-tarif-sauna">&#10006;</div>
+							<label for="name">
 								Название тарифа:&nbsp;
-								<input align="right" type="text" class="text-input title-input" name="tariffSaunaName" placeholder="Введите текст">
+								<input align="right" type="text" class="text-input title-tariff-input _req" name="name" placeholder="Введите текст">
 							</label>
-							<div class="button-input_blue" data-link="sauna" id="changePriceForPeriod">Изменить цены на период</div>
+							<div class="button-input_blue change-price-for-period" data-link="sauna" id="changePriceForPeriod">Изменить цены на период</div>
 							<div class="table2 m-dark-border table2_near-dependent">
 								<div class="table2__sidebar" style="margin-left: 0px;">
-									<div class="table2__corner table2__fixed m-dark-border">
+									<div class="table2__corner table2__fixed">
 										<span>Категории номеров</span>
 									</div>
 									<div class="table2__fixedData m-dark-border" id="leftSideBarSauna">
-										
+				
 									</div>
 								</div>
 								<div class="table2__layout">
 									<div class="table2__head table2__fixed">
 										<div class="grid m-table-sauna">
-											
+										
 										</div>
 										<div class="table2__data table2__fixedData">
 											<table class="table2__table">
-												<tbody class="table2__body">
+												<tbody class="table2__body__sauna">
 
 												</tbody>
 											</table>
@@ -2370,7 +2384,78 @@ define(["jquery"], function ($) {
 							</div>
 						</form>
 						<div class="saved-container-sauna">
-							<div class="button-input" id="saveUniqueDatas">Сохранить изменения</div>
+							<div class="button-input" id="saveTariffSauna">Сохранить</div>
+						</div>
+					</div>
+				</div>
+				<div class="overlay js-overlay-tarif-sauna-internal">
+					<div class="popup js-popup-tarif-sauna-internal">
+						<div class="close-popup js-close-popup-tarif-sauna-internal">&#10006;</div>
+						<div class="form__period-sauna">
+							<div class="form__period__item">
+								<label for="from">
+									<input class="date_field empty date-sauna _req" name="from" type="date" maxlength="10" value placeholder="Выберите дату">
+								</label>
+								&nbsp;
+								<span>—</span>
+								&nbsp;
+								<label for="to">
+									<input class="date_field empty date-sauna _req" name="to" type="date" maxlength="10" value placeholder="Выберите дату">
+								</label>
+							</div>
+						</div>
+						<div class="button-input" id="addPeriod" data-link="sauna">Добавить период</div>
+						<div class="table3 m-dark-border table2_near-dependent">
+							<div class="table3__sidebar m-dark-border" style="margin-left: 0px;">
+								<div class="table3__corner table2__fixed">
+									<span>Категории номеров</span>
+								</div>
+								<div class="table2__sidecell table2__sidecell_height_md m-dark-border" title="allCategories">
+									Все категории
+								</div>
+								<div class="table2__fixedData m-dark-border" id="leftSideBarSaunaInternal">
+							
+								</div>
+								<div class="table3__layout">
+								<div class="table3__head table2__fixed">
+									<div class="grid m-table-sauna-internal">
+										<div class="table2__month">
+											<div class="table2__dates">
+												<span class="table2__date">пн</span>
+											</div>
+											<div class="table2__dates">
+												<span class="table2__date">вт</span>
+											</div>
+											<div class="table2__dates">
+												<span class="table2__date">ср</span>
+											</div>
+											<div class="table2__dates">
+												<span class="table2__date">чт</span>
+											</div>
+											<div class="table2__dates">
+												<span class="table2__date">пт</span>
+											</div>
+											<div class="table2__dates">
+												<span class="table2__date">сб</span>
+											</div>
+											<div class="table2__dates">
+												<span class="table2__date">вс</span>
+											</div>
+											<div class="table2__dates">
+												<span class="table2__date">все дни</span>
+											</div>
+										</div>
+									</div>
+									<div class="table2__data table2__fixedData">
+										<table class="table2__table">
+											<tbody class="table2__body__sauna-internal">
+
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -2381,7 +2466,7 @@ define(["jquery"], function ($) {
 			$(".price-tariffs__entity").append(res)
 
 			if(saunaCategoriesData != '') getLeftSideBarSauna(saunaCategoriesData)
-			if(cottageCategoriesData != '') getLeftSideBarCottage(cottageCategoriesData)
+			if(cottageCategoriesData != '') getLeftSideBarCottage(cottageCategoriesData, saunaCategoriesData)
 			getMonth(saunaCategoriesData, cottageCategoriesData)
 		}
 
@@ -2405,7 +2490,7 @@ define(["jquery"], function ($) {
 				<div class="time-block__nav navigation" data-link="time-block-sauna">Блокировка времени</div>
 			</div>
 			<div class="close-popup js-close-popup-edit-bathhouse">&#10006;</div>
-			<form action="#" method="#" id="saunaForm">
+			<form action="#" method="#" id="saunaEditForm">
 				<div class="wrap-entity-popup-sauna">
 					<div class="description-sauna__entity-popup-sauna">
 						<label for="name">
@@ -2417,12 +2502,12 @@ define(["jquery"], function ($) {
 							<div class="clear__btn active">&#x2716;</div>
 						</div>
 					</label>
-					<label for="tariff_id__bathhouse">
+					<label for="tariff_id__bathhouse-edit">
 						Ценовой тариф: 
 						<div class="cont">
-							<input type="text" name="tariff_id__bathhouse" data-id="${categoryData[0].tariff_id}"
+							<input type="text" name="tariff_id__bathhouse-edit" data-id="${categoryData[0].tariff_id}"
 								data-type=""
-								value="${tariffValue != undefined ? tariffValue : ""}" class="tariff_id__bathhouse__input text-input" placeholder="Выберите тариф" />
+								value="${tariffValue != undefined ? tariffValue : ""}" class="tariff_id__bathhouse__input__edit text-input" placeholder="Выберите тариф" />
 							<div class="clear__btn active">&#x2716;</div>
 							${bathhouseTariffs != '' ? getTariffsList(bathhouseTariffs) : ''}
 						</div>
@@ -2488,7 +2573,7 @@ define(["jquery"], function ($) {
 							<div class="clear__btn active">&#x2716;</div>
 						</div>
 					</label>
-					<div class="button-input" id="sendEditCategorySauna">Сохранить</div>
+					<div class="button-input" data-id="${categoryData[0].category_id}" id="sendEditCategorySauna">Сохранить</div>
 				</div>
 				<div class="сonveniences-sauna__entity-popup-sauna hidden">
 										<ul class="conveniences-list-sauna">
@@ -6025,7 +6110,29 @@ define(["jquery"], function ($) {
 					success: function (response) {
 						resolve(response)
 					},
-					error: function (err, response) {
+					error: function (err) {
+						console.debug(err)
+					},
+				})
+			})
+		}
+
+		function patchCategorySaunaRequest(data, categoryId) {
+			return new Promise((resolve) => {
+				$.ajax({
+					type: "PATCH",
+					url:
+						"https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/change_categories.php?id=" +
+						AMOCRM.constant("account").id + "&type_data=bathhouse&category_id=" + categoryId,
+					headers: {
+						"Content-type": "application/json",
+					},
+					data: data,
+					dataType: "json",
+					success: function (response) {
+						resolve(response)
+					},
+					error: function (err) {
 						console.debug(err)
 					},
 				})
@@ -6055,8 +6162,11 @@ define(["jquery"], function ($) {
 			})
 		}
 
-		function addCategorySauna(file = "") {
-			const form = document.getElementById("saunaForm")
+		function addCategorySauna(e, categoryId, file = "") {
+			let form
+			if($(e.target).is('#sendEditCategorySauna')) {
+				form = document.getElementById("saunaEditForm")
+			} else form = document.getElementById("saunaForm")
 
 			let formData = new FormData(form)
 			if (file != "") formData.append("image", file)
@@ -6065,7 +6175,13 @@ define(["jquery"], function ($) {
 
 			function formValidate(form) {
 				let error = 0
-				let formReq = $("#saunaForm ._req")
+
+				let formReq
+				if($(form).is('#saunaEditForm')) {
+					formReq = $('#saunaEditForm ._req')
+				} else {
+					formReq = $("#saunaForm ._req")
+				}
 
 				for (let i = 0; i < formReq.length; i++) {
 					const input = formReq[i]
@@ -6128,6 +6244,9 @@ define(["jquery"], function ($) {
 					} else if (name == "tariff_id__bathhouse") {
 						let tariff_id = $(`.tariff_id__bathhouse__input[name="${name}"]`).attr("data-id")
 						body["tariff_id"] = Number(tariff_id)
+					} else if(name == 'tariff_id__bathhouse-edit'){
+						let tariff_id = $(`.tariff_id__bathhouse__input__edit[name="${name}"]`).attr("data-id")
+						body["tariff_id"] = Number(tariff_id)
 					} else if (name == "min_guests" || name == "max_guests") {
 						body[name] = Number(value)
 					} else if (name == "image") {
@@ -6148,20 +6267,27 @@ define(["jquery"], function ($) {
 
 				body['facilities'] = JSON.stringify(body['facilities'])
 				body = JSON.stringify(body)
-				saveCategoryBathhouseRequest(body).then((response) => {
-					$(".description-sauna__entity-popup-sauna").append(
-						'<div class="successText">Успешно создано</div>'
-					)
-					$(".categories-sauna-list").append(`
-					<div class="categories-sauna-list__container entity-list">
-						<p class="categories-sauna-list__item" data-id="${response}">${nameForLayout}</p>
-						<p class="categories-sauna-list__item" id="editCategoryBathhouse" data-link="bathhouse" data-id="${response}">[Редактировать]</p>
-						<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash categories-sauna-list__item" id="deleteCategoryItemSauna" data-id="${response}"></img>
-					</div>
-				`)
-					$(".js-overlay-sauna").fadeOut()
-					form.reset()
-				})
+				if($(e.target).is('#sendEditCategorySauna')) {
+					patchCategorySaunaRequest(body, categoryId).then((response) => {
+						$(".js-overlay-edit-bathhouse").fadeOut()
+						form.reset()
+					})
+				} else {
+					saveCategoryBathhouseRequest(body).then((response) => {
+						$(".description-sauna__entity-popup-sauna").append(
+							'<div class="successText">Успешно создано</div>'
+						)
+						$(".categories-sauna-list").append(`
+						<div class="categories-sauna-list__container entity-list">
+							<p class="categories-sauna-list__item" data-id="${response}">${nameForLayout}</p>
+							<p class="categories-sauna-list__item" id="editCategoryBathhouse" data-link="bathhouse" data-id="${response}">[Редактировать]</p>
+							<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash categories-sauna-list__item" id="deleteCategoryItemSauna" data-id="${response}"></img>
+						</div>
+					`)
+						$(".js-overlay-sauna").fadeOut()
+						form.reset()
+					})
+				}
 			}
 		}
 
@@ -6267,7 +6393,6 @@ define(["jquery"], function ($) {
 
 					if (data["categories"].length != 0) {
 						data["tariff_id"] = response
-						let tariff_id = data['tariff_id']
 						data = JSON.stringify(data)
 						$.ajax({
 							type: "PUT",
@@ -6337,6 +6462,156 @@ define(["jquery"], function ($) {
 					},
 				})
 			})
+		}
+
+		function saveTariffSaunaRequest(body) {
+			return new Promise((resolve) => {
+				$.ajax({
+					type: "POST",
+					url:
+						"https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/create_tariffs.php?id=" +
+						AMOCRM.constant("account").id +
+						"&type_data=bathhouse",
+					headers: {
+						"Content-type": "application/json",
+					},
+					data: body,
+					dataType: "json",
+					success: function (response) {
+						resolve(response)
+					},
+					error: function (err) {
+						console.debug(err)
+					},
+				})
+			})
+		}
+
+		function saveTariffSauna(saunaCategoriesData) {
+			const form = document.getElementById("tariffFormSauna")
+
+			let formData = new FormData(form)
+
+			let error = formValidate(form)
+
+			function formValidate(form) {
+				let error = 0
+				let formReq = $("#tariffFormSauna ._req")
+
+				for (let i = 0; i < formReq.length; i++) {
+					const input = formReq[i]
+					formRemoveError(input)
+
+					if (input.value === "") {
+						formAddError(input)
+						error++
+					}
+				}
+				return error
+			}
+
+			function formAddError(input) {
+				$(input).addClass("_error")
+			}
+			function formRemoveError(input) {
+				$(input).removeClass("_error")
+			}
+
+			if (error > 0) {
+				alert("Ключевые поля не заполнены")
+			} else {
+				let body = {}
+				let nameForLayout
+
+				let data = {
+					categories: [],
+				}
+
+				for (let [name, value] of formData) {
+					if (name == "name") {
+						body[name] = value
+						nameForLayout = value
+					} else if (name.includes("price[")) {
+						//Надо будет прописать так же tariff_id, но это в complete POST для тарифа
+						let category_id = $(`.table2__input[name="${name}"]`).attr(
+							"data-category"
+						)
+						let category = {
+							category_id: category_id,
+							dates: {},
+						}
+						if (value != "") {
+							category["dates"]["date"] = $(
+								`.table2__input[name="${name}"]`
+							).attr("data-date")
+							category["dates"]["price"] = value
+							data["categories"].push(category)
+						}
+					}
+				}
+
+				body = JSON.stringify(body)
+				saveTariffSaunaRequest(body).then((response) => {
+					$(".saved-container-sauna").prepend(
+						'<div class="successText">Успешно создано</div>'
+					)
+					$(".tariffs-sauna-list").append(`
+					<div class="tariffs-sauna-list__container entity-list">
+						<p class="tariffs-sauna-list__item" data-id="${response}">${nameForLayout}</p>
+						<p class="tariffs-sauna-list__item" id="editTariff" data-link="sauna" data-id="${response}">[Редактировать]</p>
+						<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash ctariffs-sauna-list__item" id="deleteTariffItemSauna" data-id="${response}"></img>
+					</div>
+				`)
+					$("#saveTariffSauna").addClass("button-input-disabled")
+
+					if (data["categories"].length != 0) {
+						data["tariff_id"] = response
+						data = JSON.stringify(data)
+						$.ajax({
+							type: "PUT",
+							url:
+								"https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/change_tariffs.php?id=" +
+								AMOCRM.constant("account").id +
+								"&type_data=bathhouse&type_request=unique_dates",
+							headers: {
+								"Content-type": "application/json",
+							},
+							data: data,
+							dataType: "json",
+							success: function (response) {
+								console.log(response)
+							},
+							error: function (err) {
+								console.debug(err)
+							},
+						})
+					}
+					if (collectDataPeriodSauna(saunaCategoriesData, response) != undefined) {
+						let periodsData = collectDataPeriodSauna(saunaCategoriesData, response)
+						if (periodsData["category"].length > 0) {
+							periodsData = JSON.stringify(periodsData)
+							$.ajax({
+								type: "PUT",
+								url:
+									"https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/change_tariffs.php?id=" +
+									AMOCRM.constant("account").id +
+									"&type_data=bathhouse&type_request=periods",
+								headers: {
+									"Content-type": "application/json",
+								},
+								data: periodsData,
+								dataType: "json",
+								success: function (response) {
+									console.log(response)
+								},
+								error: function (err) {
+									console.debug(err)
+								},
+							})
+						}
+					}
+				})
+			}
 		}
 
 		function saveGeneralSettings(e) {
@@ -6736,128 +7011,6 @@ define(["jquery"], function ($) {
 			})
 		}
 
-		async function updateSettings(e) {
-			const fieldConstructor = (id, pipeId = "", type = "") => ({
-				id: id,
-				pipeId: pipeId,
-				type: type,
-			})
-
-			const fieldConstructorEl = (el) => {
-				return fieldConstructor(
-					el.attr("data-id") ? el.attr("data-id") : "",
-					"",
-					el.attr("data-type") ? el.attr("data-type") : ""
-				)
-			}
-			let cont = $(`#work-area-${w_code}`)
-			let accountIdAmo = AMOCRM.constant("account").id,
-				dataG = {
-					accountIdAmo: accountIdAmo,
-					data: {
-						referer: self.system().domain,
-						clientUuId: self.get_settings().oauth_client_uuid,
-						settings: {
-							fields: {
-								price: fieldConstructor(""),
-								objectName: fieldConstructor(""),
-								arrivalDate: fieldConstructor(""),
-								departureDate: fieldConstructor(""),
-							},
-							createTask: 0,
-							logRecord: 0,
-						},
-						userSettings: [],
-						autoSettings: {
-							statuses: {
-								newBooking: fieldConstructor(""),
-								bookingAccept: fieldConstructor(""),
-								checkIn: fieldConstructor(""),
-								checkOut: fieldConstructor(""),
-								bookingCancelled: fieldConstructor(""),
-							},
-							statusesSyncType: {
-								syncType: fieldConstructor("syncWithoutCodition"),
-								conditions: [],
-							},
-							findLeadDouble: 0,
-							leadDoubleStatuses: [],
-							logRecordPipelines: [],
-						},
-					},
-				}
-
-			if (e.type == "initSettings") {
-				let oldData = await getSettingsData(AMOCRM.constant("account").id),
-					newUserData = {
-						userId: AMOCRM.constant("user").id,
-						login: AMOCRM.constant("user").login,
-						pass: "123123",
-						companyDefault: {
-							id: "",
-							name: "",
-						},
-						isAdmin: 1,
-					}
-				if (oldData.status == "no settings") {
-					let userArr = []
-
-					userArr.push(newUserData)
-
-					dataG.data.userSettings = userArr
-					saveDataSimple(dataG)
-				} else {
-					oldData.userSettings = oldData.userSettings.map((item) => {
-						if (item.userId != AMOCRM.constant("user").id) return item
-						else return newUserData
-					})
-					saveDataSimple(oldData)
-				}
-			} else {
-				// settings
-				{
-					let price = cont.find(".settings__entity .price__input"),
-						objectName = cont.find(".settings__entity .objectName__input"),
-						arrivalDate = cont.find(".settings__entity .arrivalDate__input"),
-						departureDate = cont.find(".settings__entity .departureDate__input")
-
-					dataG.data.settings.fields.price = fieldConstructorEl(price)
-					dataG.data.settings.fields.objectName = fieldConstructorEl(objectName)
-					dataG.data.settings.fields.arrivalDate =
-						fieldConstructorEl(arrivalDate)
-					dataG.data.settings.fields.departureDate =
-						fieldConstructorEl(departureDate)
-				}
-
-				{
-					cont
-						.find(`.default-statuses-wrap .auto-settings__list-el`)
-						.each((i, el) => {
-							let id = $(el).attr("data-id"),
-								key = automationArr.find((item) => item.id == id).key,
-								input = $(el).find(".status__input")
-							dataG.data.autoSettings.statuses[key] = fieldConstructor(
-								input.attr("data-id") ? input.attr("data-id") : "",
-								input.attr("data-pipe-id") ? input.attr("data-pipe-id") : ""
-							)
-						})
-				}
-			}
-
-			let oldData = decodeURIComponent(
-				cont.find(`#data-${w_code}`).attr("data-old")
-			)
-			newData = JSON.stringify(dataG)
-			if (oldData != newData) {
-				cont.find(`#data-${w_code}`).val(encodeURIComponent(newData))
-				$(`.${w_code}-btn__save`).removeClass("button-input-disabled")
-				$(`.${w_code}-btn__save`).addClass("button-input_blue")
-			} else {
-				$(`.${w_code}-btn__save`).addClass("button-input-disabled")
-				$(`.${w_code}-btn__save`).removeClass("button-input_blue")
-			}
-		}
-
 		function getSaveBtnHtml() {
 			const recordLangs = langs((data) => data.record)
 			return `
@@ -6908,6 +7061,62 @@ define(["jquery"], function ($) {
 				}
 
 				cottageCategoriesData.forEach(function (item) {
+					let category_id = item.category_id
+					let category = {}
+
+					$(`.table2__input[data-category-period="${category_id}"]`).each(function () {
+						if ($(this).val() != "") {
+							let dataWeek = $(this).attr("data-week")
+							if (dataWeek != "allDays") {
+								category["category_id"] = category_id
+								category[dataWeek] = $(this).val()
+							}
+						}
+					})
+					if (category["category_id"]) {
+						periods["category"].push(category)
+					}
+				})
+				return periods
+			}
+		}
+
+		function collectDataPeriodSauna(saunaCategoriesData, tariff_id = "") {
+			let error = formValidate()
+
+			function formValidate() {
+				let error = 0
+				let formReq = $(".form__period-sauna ._req")
+
+				for (let i = 0; i < formReq.length; i++) {
+					const input = formReq[i]
+					formRemoveError(input)
+
+					if (input.value === "") {
+						formAddError(input)
+						error++
+					}
+				}
+				return error
+			}
+
+			function formAddError(input) {
+				$(input).addClass("_error")
+			}
+			function formRemoveError(input) {
+				$(input).removeClass("_error")
+			}
+
+			if (error > 0) {
+			} else {
+				let periods = {
+					tariff_id: tariff_id,
+					from: $('.date-sauna[name="from"]').val(),
+					to: $('.date-sauna[name="to"]').val(),
+					category: [],
+				}
+
+				saunaCategoriesData.forEach(function (item) {
 					let category_id = item.category_id
 					let category = {}
 
@@ -7110,7 +7319,7 @@ define(["jquery"], function ($) {
 							"overflow-y": "scroll",
 							height: "85%",
 						})
-						$(`.js-popup-sauna-edit`).css({
+						$(`.js-popup-edit-bathhouse`).css({
 							top: "80%",
 							transform: "translate(-50%, -80%)",
 							"overflow-y": "scroll",
@@ -7123,7 +7332,7 @@ define(["jquery"], function ($) {
 							"overflow-y": "hidden",
 							height: "auto",
 						})
-						$(`.js-popup-sauna-edit`).css({
+						$(`.js-popup-edit-bathhouse`).css({
 							top: "50%",
 							transform: "translate(-50%, -50%)",
 							"overflow-y": "hidden",
@@ -7351,9 +7560,16 @@ define(["jquery"], function ($) {
 						addCategoryCottage(e, categoryId)
 					}
 				})
-				$("body").on("click", "#sendCategorySauna", () => {
+				$("body").on("click", "#sendCategorySauna", (e) => {
 					if (!$("#sendCategorySauna").hasClass("button-input-disabled"))
-						addCategorySauna()
+						addCategorySauna(e)
+				})
+
+				$("body").on("click", "#sendEditCategorySauna", (e) => {
+					if (!$("#sendEditCategorySauna").hasClass("button-input-disabled")) {
+						let categoryId = $(e.target).attr('data-id')
+						addCategorySauna(e, categoryId)
+					}
 				})
 
 				//Отправка формы тарифа
@@ -7363,6 +7579,15 @@ define(["jquery"], function ($) {
 							(data) => (cottageCategoriesData = data)
 						)
 						saveTariffCottage(cottageCategoriesData)
+					}
+				})
+
+				$("body").on("click", "#saveTariffSauna", async function () {
+					if (!$("#saveTariffSauna").hasClass("button-input-disabled")) {
+						await saunaCategories(AMOCRM.constant("account").id).then(
+							(data) => (saunaCategoriesData = data)
+						)
+						saveTariffSauna(saunaCategoriesData)
 					}
 				})
 

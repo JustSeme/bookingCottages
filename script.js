@@ -1385,6 +1385,10 @@ define(["jquery"], function ($) {
 					width: 95%;
 					height: 75%;
 				}
+				.${w_code} .js-popup-tariff-sauna-edit {
+					width: 95%;
+					height: 75%;
+				}
 				.${w_code} .table2__layout {
 					position: relative;
 					margin: 0 0 0 192px;
@@ -1571,6 +1575,18 @@ define(["jquery"], function ($) {
 					margin: 10px;
 					padding: 10px;
 				}
+				.${w_code} .saved-container-cottage-period {
+					position: absolute;
+					right: 5px;
+					bottom: 5px;
+					display: flex;
+					flex-direction: row;
+				}
+				.${w_code} .saved-container-cottage-period .successText {
+					z-index: 100;
+					margin: 10px;
+					padding: 10px;
+				}
 				.${w_code} .saved-container-sauna {
 					position: absolute;
 					right: 5px;
@@ -1583,11 +1599,25 @@ define(["jquery"], function ($) {
 					margin: 10px;
 					padding: 10px;
 				}
+				.${w_code} .saved-container-sauna-period {
+					position: absolute;
+					right: 5px;
+					bottom: 5px;
+					display: flex;
+					flex-direction: row;
+				}
+				.${w_code} .saved-container-sauna-period .successText {
+					z-index: 100;
+					margin: 10px;
+					padding: 10px;
+				}
 				.${w_code} .title-tariff-input {
 					margin-right: auto;
 				}
 				.${w_code} .edit {
 					cursor: pointer;
+					height: 15px;
+					width: 15px;
 				}
 				.${w_code} .blocked_periods__input {
 					cursor: pointer;
@@ -1599,6 +1629,35 @@ define(["jquery"], function ($) {
 				}
 				.${w_code} .js-popup-sauna {
 					height: 85%;
+				}
+				.${w_code} .js-popup-object-cottage {
+					height: 22%;
+					width: 60%;
+				}
+				.${w_code} .js-popup-object-sauna {
+					height: 22%;
+					width: 60%;
+				}
+				.${w_code} .js-popup-edit-bathhouse {
+					height: 85%;
+				}
+				.${w_code} .date-cottage ._error {
+					box-shadow: none;
+				}
+				.${w_code} .date-sauna ._error {
+					box-shadow: none;
+				}
+				.${w_code} .period__label p {
+					font-weight: bold;
+					margin-right: 20px;
+				}
+				.${w_code} .list__second-item {
+					display: flex;
+					order: 999;
+					margin-left: auto;
+				}
+				.${w_code} .list__second-item>* {
+					padding-right: 10px;
 				}
 			</style>`,
 			}
@@ -1908,16 +1967,17 @@ define(["jquery"], function ($) {
 				}
 				function getFormattedDate(j) {
 					let daysInCurrentMonth = getDaysInMonth(new Date().getFullYear(), new Date().getMonth() + 1)
-
+	
 					let date = new Date()
 					let currentMonth = date.getMonth() + 1
 					let currentDate = new Date().getDate()
 					currentDate = currentDate + j
 					if(currentDate > daysInCurrentMonth) {
 						currentMonth = currentMonth + 1
+						currentDate = $($('.table2__date')[j]).attr('data-day')
 					}
-
-					let str = date.getFullYear() + "-" + currentMonth + "-" + (currentDate > daysInCurrentMonth ? $($('.table2__date')[j + 8]).attr('data-day') : currentDate)
+	
+					let str = date.getFullYear() + "-" + (currentMonth >= 10 ? currentMonth : '0' + String(currentMonth)) + "-" + (currentDate >= 10 ? currentDate : '0' + String(currentDate))
 					return str
 				}
 
@@ -1951,7 +2011,7 @@ define(["jquery"], function ($) {
 						$($(".js-table2__row__cottage")[i]).append(`
 						<td class="table2__cell m-price">
 							<div class="table2__price">
-								<input style="display: flex;" type="number" name="price[${i}][${j}]" class="table2__input m-third status m-green-light" data-category="${
+								<input style="display: flex;" type="number" name="price[${i}][${j}]" data-changed="true" class="table2__input m-third status m-green-light" data-category="${
 							cottageCategoriesData[i].category_id
 						}" data-date="${getFormattedDate(j)}" value="">
 							</div>
@@ -1965,7 +2025,7 @@ define(["jquery"], function ($) {
 						$($(".js-table2__row__sauna")[i]).append(`
 						<td class="table2__cell m-price">
 							<div class="table2__price">
-								<input style="display: flex;" type="number" name="price[${i}][${j}]" class="table2__input m-third status m-green-light" data-category="${saunaCategoriesData[i].category_id}" data-date="${getFormattedDate(j)}" value="">
+								<input style="display: flex;" type="number" name="price[${i}][${j}]" data-changed="true" class="table2__input table2__input-sauna m-third status m-green-light" data-category="${saunaCategoriesData[i].category_id}" data-date="${getFormattedDate(j)}" value="">
 							</div>
 						</td>
 					`)
@@ -2091,16 +2151,17 @@ define(["jquery"], function ($) {
 				}
 				function getFormattedDate(j) {
 					let daysInCurrentMonth = getDaysInMonth(new Date().getFullYear(), new Date().getMonth() + 1)
-
+	
 					let date = new Date()
 					let currentMonth = date.getMonth() + 1
 					let currentDate = new Date().getDate()
 					currentDate = currentDate + j
 					if(currentDate > daysInCurrentMonth) {
 						currentMonth = currentMonth + 1
+						currentDate = $($('.table2__date')[j]).attr('data-day')
 					}
-
-					let str = date.getFullYear() + "-" + currentMonth + "-" + (currentDate > daysInCurrentMonth ? $($('.table2__date')[j + 8]).attr('data-day') : currentDate)
+	
+					let str = date.getFullYear() + "-" + (currentMonth >= 10 ? currentMonth : '0' + String(currentMonth)) + "-" + (currentDate >= 10 ? currentDate : '0' + String(currentDate))
 					return str
 				}
 
@@ -2125,7 +2186,7 @@ define(["jquery"], function ($) {
 						$($(".js-table2__row__sauna")[i]).append(`
 						<td class="table2__cell m-price">
 							<div class="table2__price">
-								<input style="display: flex;" type="number" name="price[${i}][${j}]" class="table2__input m-third status m-green-light" data-category="${
+								<input style="display: flex;" type="number" name="price[${i}][${j}]" data-changed="true" class="table2__input table2__input-sauna m-third status m-green-light" data-category="${
 							saunaCategoriesData[i].category_id
 						}" data-date="${getFormattedDate(j)}" value="">
 							</div>
@@ -2198,8 +2259,10 @@ define(["jquery"], function ($) {
 					res += `
 					<div class="tariffs-cottage-list__container entity-list">
 						<p class="tariffs-cottage-list__item" data-id="${item.tariff_id}">${item.name}</p>
-						<p class="tariffs-cottage-list__item edit" id="editTariff" data-link="hotel" data-id="${item.tariff_id}">[Редактировать]</p>
-						<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash categories-cottage-list__item" id="deleteTariffItemCottage" data-id="${item.tariff_id}"></img>
+						<div class="categories-cottage-list__item list__second-item">
+							<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/edit.png" class="tariffs-cottage-list__item edit" id="editTariff" data-link="hotel" data-id="${item.tariff_id}"></img>
+							<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash categories-cottage-list__item" id="deleteTariffItemCottage" data-id="${item.tariff_id}"></img>
+						</div>
 					</div>
 				`
 				})
@@ -2212,8 +2275,10 @@ define(["jquery"], function ($) {
 					res += `
 					<div class="tariffs-cottage-list__container entity-list">
 						<p class="tariffs-cottage-list__item" data-id="${item.tariff_id}">${item.name}</p>
-						<p class="tariffs-cottage-list__item edit" id="editTariffSauna" data-link="bathhouse" data-id="${item.tariff_id}">[Редактировать]</p>
-						<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash categories-cottage-list__item" id="deleteTariffItemSauna" data-id="${item.tariff_id}"></img>
+						<div class="categories-cottage-list__item list__second-item">
+							<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/edit.png" class="tariffs-cottage-list__item edit" id="editTariffSauna" data-link="bathhouse" data-id="${item.tariff_id}"></img>
+							<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash categories-cottage-list__item" id="deleteTariffItemSauna" data-id="${item.tariff_id}"></img>
+						</div>
 					</div>
 				`
 				})
@@ -2221,35 +2286,25 @@ define(["jquery"], function ($) {
 			}
 
 			//Логика для изменить цены на период
-			$("body").on(
-				"change",
-				'.table2__input[data-category-period="allCategories"]',
-				function () {
-					if ($(this).attr("data-week") != "allDays") {
-						let value = $(this).val()
-						let dayWeek = $(this).attr("data-week")
-						$(`.table2__input[data-week=${dayWeek}]`).each(function () {
-							$(this).val(value)
-						})
-					}
+			$("body").on("change", '.table2__input[data-category-period="allCategories"]', function () {
+				if ($(this).attr("data-week") != "allDays") {
+					let value = $(this).val()
+					let dayWeek = $(this).attr("data-week")
+					$(`.table2__input[data-week=${dayWeek}]`).each(function () {
+						$(this).val(value)
+					})
 				}
-			)
+			})
 
-			$("body").on(
-				"change",
-				'.table2__input[data-week="allDays"]',
-				function () {
-					if ($(this).attr("data-category-period") != "allCategories") {
-						let value = $(this).val()
-						let category = $(this).attr("data-category-period")
-						$(`.table2__input[data-category-period=${category}]`).each(
-							function () {
-								$(this).val(value)
-							}
-						)
-					}
+			$("body").on("change", '.table2__input[data-week="allDays"]', function () {
+				if ($(this).attr("data-category-period") != "allCategories") {
+					let value = $(this).val()
+					let category = $(this).attr("data-category-period")
+					$(`.table2__input[data-category-period=${category}]`).each(function () {
+						$(this).val(value)
+					})
 				}
-			)
+			})
 
 			let res = `
 		<div class="navbar-internal">
@@ -2299,22 +2354,26 @@ define(["jquery"], function ($) {
 					</div>
 				</div>
 				<div class="overlay js-overlay-tarif-cottage-internal">
+				<form action="#" id="formCottagePeriod">
 					<div class="popup js-popup-tarif-cottage-internal">
 						<div class="close-popup js-close-popup-tarif-cottage-internal">&#10006;</div>
 						<div class="form__period-cottage">
 							<div class="form__period__item">
-								<label for="from">
+								<label class="period__label" for="from">
+									<p>Период</p>
 									<input class="date_field empty date-cottage _req" name="from" type="date" maxlength="10" value placeholder="Выберите дату">
 								</label>
 								&nbsp;
 								<span>—</span>
 								&nbsp;
-								<label for="to">
+								<label class="period__label" for="to">
 									<input class="date_field empty date-cottage _req" name="to" type="date" maxlength="10" value placeholder="Выберите дату">
 								</label>
 							</div>
 						</div>
-						<div class="button-input period-btn" id="addPeriod" data-tariff="" data-link="hotel">Добавить период</div>
+						<div class="saved-container-cottage-period">
+							<div class="button-input period-btn" id="addPeriod" data-tariff="" data-link="hotel">Добавить период</div>
+						</div>
 						<div class="table3 m-dark-border table2_near-dependent">
 							<div class="table3__sidebar m-dark-border" style="margin-left: 0px;">
 								<div class="table3__corner table2__fixed">
@@ -2368,6 +2427,7 @@ define(["jquery"], function ($) {
 							</div>
 						</div>
 					</div>
+				</form>
 				</div>
 				<div class="overlay js-overlay-tariff-cottage-edit">
 					<div class="popup js-popup-tariff-cottage-edit">
@@ -2417,22 +2477,26 @@ define(["jquery"], function ($) {
 					</div>
 				</div>
 				<div class="overlay js-overlay-tarif-sauna-internal">
+				<form action="#" id="formSaunaPeriod">
 					<div class="popup js-popup-tarif-sauna-internal">
 						<div class="close-popup js-close-popup-tarif-sauna-internal">&#10006;</div>
 						<div class="form__period-sauna">
 							<div class="form__period__item">
-								<label for="from">
+								<label class="period__label" for="from">
+									<p>Период</p>
 									<input class="date_field empty date-sauna _req" name="from" type="date" maxlength="10" value placeholder="Выберите дату">
 								</label>
 								&nbsp;
 								<span>—</span>
 								&nbsp;
-								<label for="to">
+								<label class="period__label" for="to">
 									<input class="date_field empty date-sauna _req" name="to" type="date" maxlength="10" value placeholder="Выберите дату">
 								</label>
 							</div>
 						</div>
-						<div class="button-input period-btn" id="addPeriod" data-tariff="" data-link="bathhouse">Добавить период</div>
+						<div class="saved-container-sauna-period">
+							<div class="button-input period-btn" id="addPeriod" data-tariff="" data-link="bathhouse">Добавить период</div>
+						</div>
 						<div class="table3 m-dark-border table2_near-dependent">
 							<div class="table3__sidebar m-dark-border" style="margin-left: 0px;">
 								<div class="table3__corner table2__fixed">
@@ -2486,6 +2550,12 @@ define(["jquery"], function ($) {
 							</div>
 						</div>
 					</div>
+				</form>
+				</div>
+				<div class="overlay js-overlay-tariff-sauna-edit">
+					<div class="popup js-popup-tariff-sauna-edit">
+						
+					</div>
 				</div>
 			</div>
 		</div>
@@ -2493,15 +2563,17 @@ define(["jquery"], function ($) {
 
 			$(".price-tariffs__entity").append(res)
 
+			getMonth(saunaCategoriesData, cottageCategoriesData)
 			getLeftSideBarSauna(saunaCategoriesData)
 			getLeftSideBarCottage(cottageCategoriesData, saunaCategoriesData)
-			getMonth(saunaCategoriesData, cottageCategoriesData)
 		}
 
 		async function editWindowCategoryBathhouse(categoryData, bathhouseTariffs) {
 			$(".js-popup-edit-bathhouse").empty()
-			console.log(categoryData[0]);
 			categoryData[0].facilities = JSON.parse(categoryData[0].facilities)
+			if(categoryData[0].blocked_periods != null) {
+				categoryData[0].blocked_periods = JSON.parse(categoryData[0].blocked_periods)
+			}
 			let tariffValue
 			if (categoryData[0].tariff_id != 0) {
 				await tariffInfo(categoryData[0].tariff_id, 'bathhouse').then(
@@ -3368,21 +3440,52 @@ define(["jquery"], function ($) {
 						<div class="cont">
 							<input type="checkbox" name="blocked_periods" data-id=""
 								data-type=""
-								value="" id="blockTimeIntervalsEdit" class="blocked_periods__input checkbox-input"/>
+								value="" id="blockTimeIntervalsEdit" ${categoryData[0].blocked_periods != null ? 'checked' : ''} class="blocked_periods__input checkbox-input"/>
 						</div>
 					</label>
 					<p class="form__limitations">Используется для тех случаев, когда необходимо выделить промежуток как санитарный, либо если Вы хотите чтобы временной промежуток был доступен только для тех, кто бронирует ещё и коттедж</p>
 					<div class="time-block-wrap-edit"></div>
-					<div class="button-input hidden" id="addTimeBlockEdit">Добавить</div>
+					<div class="button-input ${categoryData[0].blocked_periods != null ? '' : 'hidden'}" id="addTimeBlockEdit">Добавить</div>
 				</div>
 			</div>
 		</form>
 		`
 
 			$('.js-popup-edit-bathhouse').append(res)
+
+			if(categoryData[0].blocked_periods != null) {
+				categoryData[0].blocked_periods.forEach((item) => {
+					$('.time-block-wrap-edit').append(`
+					<div class="time-block-wrap__form">
+						<label for="timeStart">
+							Время начала
+								<div class="cont">
+									<input type="time" name="timeStart" data-id="" data-type="" value="${item.timeStart}" class="timeStart__input text-input"/>
+								</div>
+						</label>
+						<label for="timeEnd">
+							Время конца
+								<div class="cont">
+									<input type="time" name="timeEnd" data-id="" data-type="" value="${item.timeEnd}" class="timeEnd__input text-input"/>
+								</div>
+						</label>
+						<label for="typeBlock">
+							Тип блокировки
+							<div class="cont">
+								<select name="typeBlock">
+									<option ${item.typeBlock == 'sanitary' ? 'selected' : ''} value="sanitary">Санитарный</option>
+									<option ${item.typeBlock == 'onlyBooking' ? 'selected' : ''} value="onlyBooking">Только при брони коттеджа</option>
+								</select>
+							</div>
+						</label>
+						<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash" id="deleteTimeBlock"></img>
+					</div>
+					`)
+				})
+			}
 		}
 
-		function getLeftSideBarCottageEdit(cottageCategoriesData, tariffData) {
+		async function getLeftSideBarCottageEdit(cottageCategoriesData, idTariff) {
 			function getDaysInMonth(year, month) {
 				return new Date(year, month, 0).getDate()
 			}
@@ -3396,11 +3499,32 @@ define(["jquery"], function ($) {
 				currentDate = currentDate + j
 				if(currentDate > daysInCurrentMonth) {
 					currentMonth = currentMonth + 1
+					currentDate = $($('.table2__date')[j]).attr('data-day')
 				}
 
-				let str = date.getFullYear() + "-" + (currentMonth >= 10 ? currentMonth : '0' + String(currentMonth)) + "-" + (currentDate > daysInCurrentMonth ? $($('.table2__date')[j + 8]).attr('data-day') : currentDate)
+				let str = date.getFullYear() + "-" + (currentMonth >= 10 ? currentMonth : '0' + String(currentMonth)) + "-" + (currentDate >= 10 ? currentDate : '0' + String(currentDate))
 				return str
 			}
+
+			function getPriceRequest(idTariff, idCategory, from, to) {
+				return new Promise((resolve) => {
+					$.ajax({
+						type: "GET",
+						url:
+							"https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/get_price.php?id=" +
+							AMOCRM.constant("account").id +
+							`&type_data=hotel&tariff_id=${idTariff}&category_id=${idCategory}&from=${from}&to=${to}`,
+						dataType: "json",
+						success: function (response) {
+							resolve(response)
+						},
+						error: function (err) {
+							console.debug(err)
+						},
+					})
+				})
+			}
+
 
 			let res = ``
 			cottageCategoriesData.forEach((item) => {
@@ -3412,29 +3536,21 @@ define(["jquery"], function ($) {
 				$(".table2__body__cottage-edit").append(
 					'<tr class="table2__row table2__row_height_md js-table2__row__cottage-edit"></tr>'
 				)
-				$(".table2__body__cottage-edit-internal").append(
-					'<tr class="table2__row table2__row_height_md js-table2__row__cottage-edit-internal"></tr>'
-				)
 			})
 
 			for (let i = 0; i < $(".js-table2__row__cottage-edit").length; i++) {
+				await getPriceRequest(idTariff, cottageCategoriesData[i].category_id, getFormattedDate(0), getFormattedDate(29)).then((data) => priceData = data)
 				for (let j = 0; j < 30; j++) {
+					let date = getFormattedDate(j)
 					$($(".js-table2__row__cottage-edit")[i]).append(`
 					<td class="table2__cell m-price">
 						<div class="table2__price">
-							<input style="display: flex;" type="number" name="price[${i}][${j}]" class="table2__input table2__input-edit m-third status m-green-light" data-category="${
+							<input style="display: flex;" type="number" name="price[${i}][${j}]" class="table2__input table2__input-edit m-third status m-green-light" data-changed="false" data-category="${
 						cottageCategoriesData[i].category_id
-					}" data-date="${getFormattedDate(j)}" value="">
+					}" data-date="${date}" value="${priceData[j].price}">
 						</div>
 					</td>
 					`)
-					tariffData.forEach(function(item) {
-						if($(`.table2__input-edit[name="price[${i}][${j}]"]`).attr('data-category') == item.category_id) {
-							if($(`.table2__input-edit[name="price[${i}][${j}]"]`).attr('data-date') == item.date) {
-								$(`.table2__input-edit[name="price[${i}][${j}]"]`).val(item.price)
-							}
-						}
-					})
 				}
 			}
 
@@ -3442,60 +3558,238 @@ define(["jquery"], function ($) {
 				'<tr class="table2__row table2__row_height_md js-table2__row__cottage-edit-internal"></tr>'
 			)
 
-			for (let i = 0; i < $(".js-table2__row__cottage-edit").length + 1; i++) {
-				for (let j = 0; j < 8; j++) {
-					let dayOfTheWeek
-					switch (j) {
-						case 0:
-							dayOfTheWeek = "monday"
-							break
-						case 1:
-							dayOfTheWeek = "tuesday"
-							break
-						case 2:
-							dayOfTheWeek = "wednesday"
-							break
-						case 3:
-							dayOfTheWeek = "thursday"
-							break
-						case 4:
-							dayOfTheWeek = "friday"
-							break
-						case 5:
-							dayOfTheWeek = "saturday"
-							break
-						case 6:
-							dayOfTheWeek = "sunday"
-							break
-						case 7:
-							dayOfTheWeek = "allDays"
-					}
-					if (i === 0) {
-						$($(".js-table2__row__cottage-edit-internal")[i]).append(`
+			$("#leftSideBarCottageEdit").append(res)
+		}
+
+		async function getLeftSideBarSaunaEdit(saunaCategoriesData, idTariff) {
+			function getDaysInMonth(year, month) {
+				return new Date(year, month, 0).getDate()
+			}
+
+			function getFormattedDate(j) {
+				let daysInCurrentMonth = getDaysInMonth(new Date().getFullYear(), new Date().getMonth() + 1)
+
+				let date = new Date()
+				let currentMonth = date.getMonth() + 1
+				let currentDate = new Date().getDate()
+				currentDate = currentDate + j
+				if(currentDate > daysInCurrentMonth) {
+					currentMonth = currentMonth + 1
+					currentDate = $($('.table2__date')[j]).attr('data-day')
+				}
+
+				let str = date.getFullYear() + "-" + (currentMonth >= 10 ? currentMonth : '0' + String(currentMonth)) + "-" + (currentDate >= 10 ? currentDate : '0' + String(currentDate))
+				return str
+			}
+
+			function getPriceRequest(idTariff, idCategory, from, to) {
+				return new Promise((resolve) => {
+					$.ajax({
+						type: "GET",
+						url:
+							"https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/get_price.php?id=" +
+							AMOCRM.constant("account").id +
+							`&type_data=bathhouse&tariff_id=${idTariff}&category_id=${idCategory}&from=${from}&to=${to}`,
+						dataType: "json",
+						success: function (response) {
+							resolve(response)
+						},
+						error: function (err) {
+							console.debug(err)
+						},
+					})
+				})
+			}
+
+			async function getPriceArray(idTariff, from, to, saunaCategoriesData) {
+				let priceArray = []
+				for(let i = 0; i < saunaCategoriesData.length; i++) {
+					let priceData = await getPriceRequest(idTariff, saunaCategoriesData[i].category_id, from, to)
+					priceArray.push(priceData)
+				}
+				return priceArray
+			}
+
+			let priceArray = await getPriceArray(idTariff, getFormattedDate(0), getFormattedDate(29), saunaCategoriesData)
+
+			let res = ``
+			saunaCategoriesData.forEach((item) => {
+				res += `
+				<div class="table2__sidecell table2__sidecell_height_md m-dark-border" title="${item.name}">
+					${item.name}
+				</div>
+			`
+				$(".table2__body__sauna-edit").append(
+					'<tr class="table2__row table2__row_height_md js-table2__row__sauna-edit"></tr>'
+				)
+			})
+
+			for (let i = 0; i < $(".js-table2__row__sauna-edit").length; i++) {
+				let tableCells
+				for (let j = 0; j < 30; j++) {
+					tableCells += `
 					<td class="table2__cell m-price">
 						<div class="table2__price">
-							<input style="display: flex;" type="number" name="price-period[${i}][${j}]" class="table2__input m-third status m-green-light" data-week="${dayOfTheWeek}" data-category-period="allCategories" value="">
+							<input style="display: flex;" type="number" name="price[${i}][${j}]" class="table2__input table2__input-edit m-third status m-green-light" data-changed="false" data-category="${
+						saunaCategoriesData[i].category_id
+					}" data-date="${getFormattedDate(j)}" value="${priceArray[i][j].price}">
 						</div>
 					</td>
-					`)
-					} else {
-						$($(".js-table2__row__cottage-edit-internal")[i]).append(`
-					<td class="table2__cell m-price">
-						<div class="table2__price">
-							<input style="display: flex;" type="number" name="price-period[${i}][${j}]" class="table2__input m-third status m-green-light" data-week="${dayOfTheWeek}" data-category-period="${cottageCategoriesData[i - 1].category_id}" value="">
+					`
+				}
+				$($(".js-table2__row__sauna-edit")[i]).append(tableCells)
+			}
+
+			$(".table2__body__sauna-edit-internal").append(
+				'<tr class="table2__row table2__row_height_md js-table2__row__sauna-edit-internal"></tr>'
+			)
+
+			$("#leftSideBarSaunaEdit").append(res)
+		}
+
+		async function editWindowTariffSauna(tariffData, idTariff) {
+			$(".js-popup-tariff-sauna-edit").empty()
+			await saunaCategories(AMOCRM.constant("account").id).then((data) => saunaCategoriesData = data)
+
+			function getMonth(saunaCategoriesData) {
+				const days = [
+					"Воскресенье",
+					"Понедельник",
+					"Вторник",
+					"Среда",
+					"Четверг",
+					"Пятница",
+					"Суббота",
+				]
+
+				function getDaysInMonth(year, month) {
+					return new Date(year, month, 0).getDate()
+				}
+
+				let daysInCurrentMonth = getDaysInMonth(new Date().getFullYear(), new Date().getMonth() + 1)
+				
+				function getMonthForLayout() {
+					year = new Date().getFullYear()
+					month = new Date().getMonth() + 2
+					return new Date(year, month, 0).toLocaleString("ru", {month: "long",})
+				}
+
+
+				function getDatesForLayout(counter) {
+					const layoutDates = []
+					let dayOfWeek = 1
+					for (let i = 0; i < 30 - counter; i++) {
+						let currentDate = 1
+						currentDate = currentDate + i
+						dayOfWeek = dayOfWeek + i
+						if (dayOfWeek >= 7) {
+							dayOfWeek = dayOfWeek % 7
+						}
+
+						layoutDates.push(`
+						<div class="table2__dates">
+							<span class="table2__date" data-day="${currentDate}">${currentDate}</span>
+							<span class="table2__day">${days[dayOfWeek]}</span>
 						</div>
-					</td>
 					`)
 					}
+					let dates = layoutDates.join()
+
+					if(saunaCategoriesData != '') {
+						$(".m-table-sauna-edit").append(`
+						<div class="table2__month">
+							<div class="table2__month-header">
+								${getMonthForLayout()}
+							</div>
+							${dates}
+						</div>
+						`)
+					}
+				}
+
+				const layoutDates = []
+				for (let i = 0; i < 30; i++) {
+					let currentDate = new Date().getDate()
+					currentDate = currentDate + i
+					let dayOfWeek = new Date().getDay() + i
+					if (dayOfWeek >= 7) {
+						dayOfWeek = dayOfWeek % 7
+					}
+					if (currentDate > daysInCurrentMonth) {
+						let dates = layoutDates.join()
+
+						$(".m-table-sauna-edit").append(`
+						<div class="table2__month">
+							<div class="table2__month-header" data-month="${new Date().getMonth() + 1}">
+								${new Date().toLocaleString("ru", {month: "long"})}
+							</div>
+							${dates}
+						</div>
+					`)
+						getDatesForLayout(i)
+						break
+					}
+
+					layoutDates.push(`
+					<div class="table2__dates">
+						<span class="table2__date" data-day="${currentDate}">${currentDate}</span>
+						<span class="table2__day">${days[dayOfWeek]}</span>
+					</div>
+					`)
 				}
 			}
 
-			$("#leftSideBarCottageEdit").append(res)
-			$("#leftSideBarCottageEditInternal").append(res)
+			let table = `
+				<div class="close-popup js-close-popup-tariff-sauna-edit">&#10006;</div>
+				<form action="#" method="post" id="tariffFormSaunaEdit" class="form-tariff" data-tariff="${idTariff}" accept-charset="utf-8">
+					<label for="name">
+						Название тарифа:&nbsp;
+						<input align="right" type="text" class="text-input title-tariff-input _req" name="name" placeholder="Введите текст" value="${tariffData[0].name}">
+					</label>
+					<div class="button-input_blue change-price-for-period" data-tariff="${idTariff}" data-link="sauna" id="changePriceForPeriod">Изменить цены на период</div>
+					<div class="table2 m-dark-border table2_near-dependent">
+						<div class="table2__sidebar" style="margin-left: 0px;">
+							<div class="table2__corner table2__fixed">
+								<span>Категории номеров</span>
+							</div>
+							<div class="table2__fixedData m-dark-border" id="leftSideBarSaunaEdit">
+
+							</div>
+						</div>
+						<div class="table2__layout">
+							<div class="table2__head table2__fixed">
+								<div class="grid m-table-sauna-edit">
+										
+								</div>
+								<div class="table2__data table2__fixedData">
+									<table class="table2__table">
+										<tbody class="table2__body__sauna-edit">
+
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				<div class="saved-container-sauna">
+					<div class="button-input" id="saveTariffSaunaEdit">Сохранить</div>
+				</div>
+			`
+
+			$('.js-popup-tariff-sauna-edit').append(table)
+
+			$('.js-popup-tariff-sauna-edit').on('change', '.table2__input-edit', function() {
+				$(this).attr('data-changed', 'true')
+			})
+
+			getMonth(saunaCategoriesData)
+			getLeftSideBarSaunaEdit(saunaCategoriesData, idTariff)
 		}
 
 		async function editWindowTariff(tariffData, idTariff) {
 			$(".js-popup-tariff-cottage-edit").empty()
+			await cottageCategories(AMOCRM.constant("account").id).then((data) => cottageCategoriesData = data)
 
 			function getMonth(cottageCategoriesData) {
 				const days = [
@@ -3587,7 +3881,7 @@ define(["jquery"], function ($) {
 
 			let table = `
 				<div class="close-popup js-close-popup-tariff-cottage-edit">&#10006;</div>
-				<form action="#" method="post" id="tariffFormCottageEdit" class="form-tariff" accept-charset="utf-8">
+				<form action="#" method="post" id="tariffFormCottageEdit" class="form-tariff" data-tariff="${idTariff}" accept-charset="utf-8">
 					<label for="name">
 						Название тарифа:&nbsp;
 						<input align="right" type="text" class="text-input title-tariff-input _req" name="name" placeholder="Введите текст" value="${tariffData[0].name}">
@@ -3625,23 +3919,12 @@ define(["jquery"], function ($) {
 
 			$('.js-popup-tariff-cottage-edit').append(table)
 
-			await cottageCategories(AMOCRM.constant("account").id).then((data) => cottageCategoriesData = data)
-			getMonth(cottageCategoriesData)
-			getLeftSideBarCottageEdit(cottageCategoriesData, tariffData)
-
-			tariffData.forEach(function(item) {
-				$(".js-table2__row__cottage-edit.table2__input").each((j) => {
-					console.log(j);
-					if(item.category_id == $('.js-table2__row__cottage-edit.table2__input')[j].attr('data-category')) {
-						console.log('hello');
-						
-						if(item.date == $('.js-table2__row__cottage-edit.table2__input')[j].attr('data-date')) {
-							$('.js-table2__row__cottage-edit.table2__input')[j].prop('value', item.price)
-							console.log($('.js-table2__row__cottage-edit.table2__input')[j].attr('data-date'));
-						}
-					}
-				})
+			$('.js-popup-tariff-cottage-edit').on('change', '.table2__input-edit', function() {
+				$(this).attr('data-changed', 'true')
 			})
+
+			getMonth(cottageCategoriesData)
+			getLeftSideBarCottageEdit(cottageCategoriesData, idTariff)
 		}
 
 		async function editWindowCategory(categoryData, hotelTariffs) {
@@ -4582,8 +4865,10 @@ define(["jquery"], function ($) {
 					res += `
 					<div class="categories-cottage-list__container entity-list">
 						<p class="categories-cottage-list__item" data-id="${item.category_id}">${item.name}</p>
-						<p class="categories-cottage-list__item edit" id="editCategory" data-link="hotel" data-id="${item.category_id}">[Редактировать]</p>
-						<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash categories-cottage-list__item" id="deleteCategoryItemCottage" data-id="${item.category_id}"></img>
+						<div class="categories-cottage-list__item list__second-item">
+							<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/edit.png" class="categories-cottage-list__item edit" id="editCategory" data-link="hotel" data-id="${item.category_id}"></img>
+							<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash categories-cottage-list__item" id="deleteCategoryItemCottage" data-id="${item.category_id}"></img>
+						</div>
 					</div>
 				`
 				})
@@ -4597,20 +4882,17 @@ define(["jquery"], function ($) {
 					res += `
 					<div class="categories-sauna-list__container entity-list">
 						<p class="categories-sauna-list__item" data-id="${item.category_id}">${item.name}</p>
-						<p class="categories-sauna-list__item edit" id="editCategoryBathhouse" data-link="bathhouse" data-id="${item.category_id}">[Редактировать]</p>
-						<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash" id="deleteCategoryItemSauna" data-id="${item.category_id}"></img>
+						<div class="categories-sauna-list__item list__second-item">
+							<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/edit.png" class="categories-sauna-list__item edit" id="editCategoryBathhouse" data-link="bathhouse" data-id="${item.category_id}"></img>
+							<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash" id="deleteCategoryItemSauna" data-id="${item.category_id}"></img>
+						</div>
 					</div>
 				`
 				})
 				return res
 			}
 
-			function getObjectCategoriesHtml(
-				bathhouseTariffs,
-				hotelTariffs,
-				cottageCategoriesData,
-				saunaCategoriesData
-			) {
+			function getObjectCategoriesHtml(bathhouseTariffs, hotelTariffs, cottageCategoriesData, saunaCategoriesData) {
 				const textArea = self.render(
 					{ref: "/tmpl/controls/textarea.twig"},
 					{
@@ -4627,9 +4909,7 @@ define(["jquery"], function ($) {
 				</div>
 				<div class="wrap-entity-internal">
 					<div class="cottages__entity-internal">
-						<div class="categories-cottage-list">${getCategoriesCottageList(
-							cottageCategoriesData
-						)}</div>
+						<div class="categories-cottage-list">${getCategoriesCottageList(cottageCategoriesData)}</div>
 						<div class="button-input" id="add-category">Добавить категорию</div>
 						<div class="overlay js-overlay">
 							<div class="popup js-popup">
@@ -5285,9 +5565,7 @@ define(["jquery"], function ($) {
 						</div>
 					</div>
 					<div class="sauna__entity-internal hidden">
-						<div class="categories-sauna-list">${getCategoriesSaunaList(
-							saunaCategoriesData
-						)}</div>
+						<div class="categories-sauna-list">${getCategoriesSaunaList(saunaCategoriesData)}</div>
 						<div class="button-input" id="add-category-sauna">Добавить категорию</div>
 						<div class="overlay js-overlay-sauna">
 							<div class="popup js-popup-sauna">
@@ -6170,6 +6448,72 @@ define(["jquery"], function ($) {
 				return res
 			}
 
+			function getObjectListHtml(cottageCategoriesData, saunaCategoriesData) {
+
+				let res = `
+					<div class="navbar-internal">
+						<div class="cottages__nav active" data-link="cottages">Коттеджи</div>
+						<div class="sauna__nav" data-link="sauna">Сауна</div>
+					</div>
+					<div class="wrap-entity-internal">
+						<div class="cottages__entity-internal">
+							<p>Здесь будет список объектов коттеджей</p>
+							<div class="button-input" id="add-object-cottage">Добавить объект</div>
+							<div class="overlay js-overlay-object-cottage">
+								<div class="popup js-popup-object-cottage">
+									<div class="close-popup js-close-popup-object-cottage">&#10006;</div>
+									<form action="#" method="post" id="objectCottageForm" class="form-tariff" accept-charset="utf-8">
+										<label for="number">
+											Название объекта:&nbsp;
+											<input type="text" class="text-input _req" name="number" placeholder="Введите текст">
+										</label>
+										<label for="category_id">
+											Категория номера: 
+											<div class="cont">
+												<input type="text" name="category_id" data-id=""
+													data-type=""
+													value="" class="category_id-cottage__input text-input _req" placeholder="Выберите категорию" />
+												<div class="clear__btn active">&#x2716;</div>
+												${getCategoriesList(cottageCategoriesData)}
+											</div>
+										</label>
+										<div class="button-input" id="saveObjectCottage">Сохранить</div>
+									</form>
+								</div>
+							</div>
+						</div>
+						<div class="sauna__entity-internal hidden">
+							<p>Здесь будет список объектов саун</p>
+							<div class="button-input" id="add-object-sauna">Добавить объект</div>
+							<div class="overlay js-overlay-object-sauna">
+								<div class="popup js-popup-object-sauna">
+									<div class="close-popup js-close-popup-object-sauna">&#10006;</div>
+									<form action="#" method="post" id="objectSaunaForm" class="form-tariff" accept-charset="utf-8">
+										<label for="name">
+											Название объекта:&nbsp;
+											<input type="text" class="text-input _req" name="name" placeholder="Введите текст">
+										</label>
+										<label for="category_id-sauna">
+											Категория номера: 
+											<div class="cont">
+												<input type="text" name="category_id-sauna" data-id=""
+													data-type=""
+													value="" class="category_id-sauna__input text-input" placeholder="Выберите категорию" />
+												<div class="clear__btn active">&#x2716;</div>
+												${getCategoriesList(saunaCategoriesData)}
+											</div>
+										</label>
+										<div class="button-input" id="saveObjectSauna">Сохранить</div>
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+				`
+
+				return res
+			}
+
 			$(`#work_area .list__body-right__top`).append(getSaveBtnHtml())
 			$(`#work-area-${w_code}`).append(`
 			<div class="loader-cont">
@@ -6201,15 +6545,10 @@ define(["jquery"], function ($) {
 						${getSettingHtml(data, pipelines)}
 					</div>
 					<div class="object-categories__entity hidden">
-						${getObjectCategoriesHtml(
-							bathhouseTariffs,
-							hotelTariffs,
-							cottageCategoriesData,
-							saunaCategoriesData
-						)}
+						${getObjectCategoriesHtml(bathhouseTariffs, hotelTariffs, cottageCategoriesData, saunaCategoriesData)}
 					</div>
 					<div class="object-list__entity hidden">
-						<p>Object list</p>
+						${getObjectListHtml(cottageCategoriesData, saunaCategoriesData)}
 					</div>
 					<div class="price-tariffs__entity hidden">
 					</div>
@@ -6281,6 +6620,20 @@ define(["jquery"], function ($) {
 				let selected = selectedId.includes(tariff.tariff_id) ? "selected" : ""
 				res += `
 			<li class="custom__list-el" ${selected} data-id="${tariff.tariff_id}" data-name="${tariff.name}" data-dates="${tariff.unique_dates}" data-price="${tariff.periods}">${tariff.name}</li>
+			`
+			})
+
+			res += "</ul>"
+			return res
+		}
+
+		function getCategoriesList(categories, selectedId = "", multiSelect = false) {
+			let res = `<ul class="custom__list hidden custom-scroll ${multiSelect ? "multi-select" : ""}">`
+
+			categories.forEach((category) => {
+				let selected = selectedId.includes(category.category_id) ? "selected" : ""
+				res += `
+			<li class="custom__list-el" ${selected} data-id="${category.category_id}" data-name="${category.name}">${category.name}</li>
 			`
 			})
 
@@ -6374,14 +6727,73 @@ define(["jquery"], function ($) {
 						$(".categories-cottage-list").append(`
 						<div class="categories-cottage-list__container entity-list">
 							<p class="categories-cottage-list__item" data-id="${response}">${nameForLayout}</p>
-							<p class="categories-cottage-list__item" id="editCategory" data-link="hotel" data-id="${response}">[Редактировать]</p>
-							<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash categories-cottage-list__item" id="deleteCategoryItemCottage" data-id="${response}"></img>
+							<div class="categories-cottage-list__item list__second-item">
+								<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/edit.png" class="categories-cottage-list__item" id="editCategory" data-link="hotel" data-id="${response}"></img>
+								<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash categories-cottage-list__item" id="deleteCategoryItemCottage" data-id="${response}"></img>
+							</div>
 						</div>
 					`)
 						$(".js-overlay").fadeOut()
 						form.reset()
 					})
 				}
+			}
+		}
+
+		function addObjectCottage(e, objectId) {
+			let form
+			if($(e.target).is('#sendEditCategoryCottage')) {
+				form = document.getElementById("objectCottageEditForm")
+			}  else form = document.getElementById("objectCottageForm")
+
+			let formData = new FormData(form)
+
+			let error = formValidate(form)
+
+			function formValidate(form) {
+				let error = 0
+				let formReq
+				if($(form).is('#objectCottageEditForm')) {
+					formReq = $('#objectCottageEditForm ._req')
+				} else {
+					formReq = $("#objectCottageForm ._req")
+				}
+
+				for (let i = 0; i < formReq.length; i++) {
+					const input = formReq[i]
+					formRemoveError(input)
+
+					if (input.value === "") {
+						formAddError(input)
+						error++
+					}
+				}
+				return error
+			}
+
+			function formAddError(input) {
+				$(input).addClass("_error")
+			}
+			function formRemoveError(input) {
+				$(input).removeClass("_error")
+			}
+
+			if (error > 0) {
+				alert("Ключевые поля не заполнены")
+			} else {
+				let data = {}
+				let nameForLayout
+
+				for (let [name, value] of formData) {
+					if(name == 'number') {
+						data['number'] = value
+						nameForLayout = value
+					} else {
+						let category_id = $(form).find(`.category_id-cottage__input[name="${name}"]`).attr('data-id')
+						data['category_id'] = category_id
+					}
+				}
+				console.log(data);
 			}
 		}
 
@@ -6452,6 +6864,48 @@ define(["jquery"], function ($) {
 			})
 		}
 
+		function saveObjectListCottageRequest(data) {
+			$.ajax({
+				type: "POST",
+				url:
+					"https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/create_objects.php?id=" +
+					AMOCRM.constant("account").id +
+					"&type_data=hotel",
+				headers: {
+					"Content-type": "application/json",
+				},
+				data: data,
+				dataType: "json",
+				success: function (response) {
+					resolve(response)
+				},
+				error: function (err, response) {
+					console.debug(err)
+				},
+			})
+		}
+
+		function saveObjectListSaunaRequest(data) {
+			$.ajax({
+				type: "POST",
+				url:
+					"https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/create_objects.php?id=" +
+					AMOCRM.constant("account").id +
+					"&type_data=hotel",
+				headers: {
+					"Content-type": "application/json",
+				},
+				data: data,
+				dataType: "json",
+				success: function (response) {
+					resolve(response)
+				},
+				error: function (err, response) {
+					console.debug(err)
+				},
+			})
+		}
+
 		function addCategorySauna(e, categoryId, file = "") {
 			let form
 			if($(e.target).is('#sendEditCategorySauna')) {
@@ -6505,7 +6959,19 @@ define(["jquery"], function ($) {
 				function timeBlockFunc() {
 					let timeBlockArray = []
 					if ($("#blockTimeIntervals").is(":checked")) {
-						$(".time-block-wrap__form").each(function () {
+						$(form).find(".time-block-wrap__form").each(function () {
+							const timeStart = $(this).find('[name="timeStart"]').val()
+							const timeEnd = $(this).find('[name="timeEnd"]').val()
+							const typeBlock = $(this).find('[name="typeBlock"]').val()
+
+							timeBlockArray.push({
+								timeStart: timeStart,
+								timeEnd: timeEnd,
+								typeBlock: typeBlock,
+							})
+						})
+					} if ($("#blockTimeIntervalsEdit").is(":checked")) {
+						$(form).find(".time-block-wrap__form").each(function () {
 							const timeStart = $(this).find('[name="timeStart"]').val()
 							const timeEnd = $(this).find('[name="timeEnd"]').val()
 							const typeBlock = $(this).find('[name="typeBlock"]').val()
@@ -6556,22 +7022,23 @@ define(["jquery"], function ($) {
 				}
 
 				body['facilities'] = JSON.stringify(body['facilities'])
+				body['blocked_periods'] = JSON.stringify(body['blocked_periods'])
 				body = JSON.stringify(body)
 				if($(e.target).is('#sendEditCategorySauna')) {
 					patchCategorySaunaRequest(body, categoryId).then((response) => {
 						$(".js-overlay-edit-bathhouse").fadeOut()
+						$(".js-overlay-edit-bathhouse").empty()
 						form.reset()
 					})
 				} else {
 					saveCategoryBathhouseRequest(body).then((response) => {
-						$(".description-sauna__entity-popup-sauna").append(
-							'<div class="successText">Успешно создано</div>'
-						)
 						$(".categories-sauna-list").append(`
 						<div class="categories-sauna-list__container entity-list">
 							<p class="categories-sauna-list__item" data-id="${response}">${nameForLayout}</p>
-							<p class="categories-sauna-list__item" id="editCategoryBathhouse" data-link="bathhouse" data-id="${response}">[Редактировать]</p>
-							<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash categories-sauna-list__item" id="deleteCategoryItemSauna" data-id="${response}"></img>
+							<div class="categories-sauna-list__item list__second-item">
+								<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/edit.png" class="categories-sauna-list__item edit" id="editCategoryBathhouse" data-link="bathhouse" data-id="${response}">[Редактировать]</img>
+								<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash categories-sauna-list__item" id="deleteCategoryItemSauna" data-id="${response}"></img>
+							</div>
 						</div>
 					`)
 						$(".js-overlay-sauna").fadeOut()
@@ -6604,9 +7071,9 @@ define(["jquery"], function ($) {
 			})
 		}
 
-		function saveTariffCottage(cottageCategoriesData) {
+		function saveTariffCottage(cottageCategoriesData, e) {
 			let form
-			if($(e.target).is('saveTariffCottageEdit')) {
+			if($(e.target).is('#saveTariffCottageEdit')) {
 				form = document.getElementById('tariffFormCottageEdit')
 			} else {
 				form = document.getElementById("tariffFormCottage")
@@ -6619,7 +7086,7 @@ define(["jquery"], function ($) {
 			function formValidate(form) {
 				let error = 0
 				let formReq
-				if($(form).is('tariffFormCottageEdit')) {
+				if($(form).is('#tariffFormCottageEdit')) {
 					formReq = $("#tariffFormCottageEdit ._req")
 				} else {
 					formReq = $("#tariffFormCottage ._req")
@@ -6659,40 +7126,37 @@ define(["jquery"], function ($) {
 						body[name] = value
 						nameForLayout = value
 					} else if (name.includes("price[")) {
-						//Надо будет прописать так же tariff_id, но это в complete POST для тарифа
-						let category_id = $(`.table2__input[name="${name}"]`).attr(
-							"data-category"
-						)
-						let category = {
-							category_id: category_id,
-							dates: {},
-						}
-						if (value != "") {
-							category["dates"]["date"] = $(`.table2__input[name="${name}"]`).attr("data-date")
-							category["dates"]["price"] = value
-							data["categories"].push(category)
+						if($(form).is('#tariffFormCottage')) {
+							let category_id = $(`.table2__input[name="${name}"]`).attr("data-category")
+							let category = {
+								category_id: category_id,
+								dates: {},
+							}
+							if (value != "") {
+								category["dates"]["date"] = $(`.table2__input[name="${name}"][data-changed="true"]`).attr("data-date")
+								category["dates"]["price"] = value
+								data["categories"].push(category)
+							}
+						} else if($(`.table2__input-edit[name="${name}"]`).attr('data-changed') == 'true') {
+							let category_id = $(`.table2__input[name="${name}"]`).attr("data-category")
+							let category = {
+								category_id: category_id,
+								dates: {},
+							}
+							if ($(form).is('#tariffFormCottageEdit')) {
+								category["dates"]["date"] = $(`.table2__input[name="${name}"][data-changed="true"]`).attr("data-date")
+								category["dates"]["price"] = value != '' ? value : 0
+								data["categories"].push(category)
+							}
 						}
 					}
 				}
 
 				body = JSON.stringify(body)
-				saveTariffCottageRequest(body).then((response) => {
-					$(".saved-container-cottage").prepend(
-						'<div class="successText">Успешно создано</div>'
-					)
-					$(".tariffs-cottage-list").append(`
-					<div class="tariffs-cottage-list__container entity-list">
-						<p class="tariffs-cottage-list__item" data-id="${response}">${nameForLayout}</p>
-						<p class="tariffs-cottage-list__item edit" id="editTariff" data-link="hotel" data-id="${response}">[Редактировать]</p>
-						<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash ctariffs-cottage-list__item" id="deleteTariffItemCottage" data-id="${response}"></img>
-					</div>
-					`)
-					form.reset()
-					$('.js-overlay-tarif-cottage').fadeOut()
-					$('.js-overlay-tarif-cottage-internal').fadeOut()
-
+				if($(form).is('#tariffFormCottageEdit')) {
+					let idTariff = $(form).attr('data-tariff')
 					if (data["categories"].length != 0) {
-						data["tariff_id"] = response
+						data["tariff_id"] = idTariff
 						data = JSON.stringify(data)
 						$.ajax({
 							type: "PUT",
@@ -6703,18 +7167,20 @@ define(["jquery"], function ($) {
 							headers: {
 								"Content-type": "application/json",
 							},
-							data: data,
 							dataType: "json",
+							data: data,
 							success: function (response) {
-								console.log(response)
+								form.reset()
+								$('.js-overlay-tariff-cottage-edit').fadeOut()
+								$('.js-overlay-tarif-cottage-internal').fadeOut()
 							},
 							error: function (err) {
 								console.debug(err)
 							},
 						})
 					}
-					if (collectDataPeriodCottage(cottageCategoriesData, response) != undefined) {
-						let periodsData = collectDataPeriodCottage(cottageCategoriesData, response)
+					if (collectDataPeriodCottage(cottageCategoriesData, idTariff) != undefined) {
+						let periodsData = collectDataPeriodCottage(cottageCategoriesData, idTariff)
 						if (periodsData["category"].length > 0) {
 							periodsData = JSON.stringify(periodsData)
 							$.ajax({
@@ -6729,7 +7195,9 @@ define(["jquery"], function ($) {
 								data: periodsData,
 								dataType: "json",
 								success: function (response) {
-									console.log(response)
+									let formPeriod = document.getElementById('formCottagePeriod')
+									$('.js-overlay-tarif-cottage-internal').fadeOut()
+									formPeriod.reset()
 								},
 								error: function (err) {
 									console.debug(err)
@@ -6737,7 +7205,68 @@ define(["jquery"], function ($) {
 							})
 						}
 					}
-				})
+				} else {
+					saveTariffCottageRequest(body).then((response) => {
+						$(".tariffs-cottage-list").append(`
+						<div class="tariffs-cottage-list__container entity-list">
+							<p class="tariffs-cottage-list__item" data-id="${response}">${nameForLayout}</p>
+							<div class="categories-cottage-list__item list__second-item">
+								<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/edit.png" class="tariffs-cottage-list__item edit" id="editTariff" data-link="hotel" data-id="${response}"></img>
+								<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash ctariffs-cottage-list__item" id="deleteTariffItemCottage" data-id="${response}"></img>
+							</div>
+						</div>
+						`)
+						form.reset()
+						$('.js-overlay-tarif-cottage').fadeOut()
+	
+						if (data["categories"].length != 0) {
+							data["tariff_id"] = response
+							data = JSON.stringify(data)
+							$.ajax({
+								type: "PUT",
+								url:
+									"https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/change_tariffs.php?id=" +
+									AMOCRM.constant("account").id +
+									"&type_data=hotel&type_request=unique_dates",
+								headers: {
+									"Content-type": "application/json",
+								},
+								data: data,
+								dataType: "json",
+								success: function (response) {
+									console.log(response)
+								},
+								error: function (err) {
+									console.debug(err)
+								},
+							})
+						}
+						if (collectDataPeriodCottage(cottageCategoriesData, response) != undefined) {
+							let periodsData = collectDataPeriodCottage(cottageCategoriesData, response)
+							if (periodsData["category"].length > 0) {
+								periodsData = JSON.stringify(periodsData)
+								$.ajax({
+									type: "PUT",
+									url:
+										"https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/change_tariffs.php?id=" +
+										AMOCRM.constant("account").id +
+										"&type_data=hotel&type_request=periods",
+									headers: {
+										"Content-type": "application/json",
+									},
+									data: periodsData,
+									dataType: "json",
+									success: function (response) {
+										console.log(response)
+									},
+									error: function (err) {
+										console.debug(err)
+									},
+								})
+							}
+						}
+					})
+				}
 			}
 		}
 
@@ -6787,8 +7316,13 @@ define(["jquery"], function ($) {
 			})
 		}
 
-		function saveTariffSauna(saunaCategoriesData) {
-			const form = document.getElementById("tariffFormSauna")
+		function saveTariffSauna(saunaCategoriesData, e) {
+			let form
+			if($(e.target).is('#saveTariffSaunaEdit')) {
+				form = document.getElementById("tariffFormSaunaEdit")
+			} else {
+				form = document.getElementById("tariffFormSauna")
+			}
 
 			let formData = new FormData(form)
 
@@ -6796,7 +7330,12 @@ define(["jquery"], function ($) {
 
 			function formValidate(form) {
 				let error = 0
-				let formReq = $("#tariffFormSauna ._req")
+				let formReq
+				if($(form).is('#tariffFormSaunaEdit')) {
+					formReq = $("#tariffFormSaunaEdit ._req")
+				} else {
+					formReq = $("#tariffFormSauna ._req")
+				}
 
 				for (let i = 0; i < formReq.length; i++) {
 					const input = formReq[i]
@@ -6832,42 +7371,37 @@ define(["jquery"], function ($) {
 						body[name] = value
 						nameForLayout = value
 					} else if (name.includes("price[")) {
-						//Надо будет прописать так же tariff_id, но это в complete POST для тарифа
-						let category_id = $(`.table2__input[name="${name}"]`).attr(
-							"data-category"
-						)
-						let category = {
-							category_id: category_id,
-							dates: {},
-						}
-						if (value != "") {
-							category["dates"]["date"] = $(
-								`.table2__input[name="${name}"]`
-							).attr("data-date")
-							category["dates"]["price"] = value
-							data["categories"].push(category)
+						if($(form).is('#tariffFormSauna')) {
+							let category_id = $(`.table2__input-sauna[name="${name}"]`).attr("data-category")
+							let category = {
+								category_id: category_id,
+								dates: {},
+							}
+							if (value != "") {
+								category["dates"]["date"] = $(`.table2__input[name="${name}"][data-changed="true"]`).attr("data-date")
+								category["dates"]["price"] = value
+								data["categories"].push(category)
+							}
+						} else if($(`.table2__input-edit[name="${name}"]`).attr('data-changed') == 'true') {
+							let category_id = $(`.table2__input-sauna[name="${name}"]`).attr("data-category")
+							let category = {
+								category_id: category_id,
+								dates: {},
+							}
+							if ($(form).is('#tariffFormSaunaEdit')) {
+								category["dates"]["date"] = $(`.table2__input[name="${name}"][data-changed="true"]`).attr("data-date")
+								category["dates"]["price"] = value != '' ? value : 0
+								data["categories"].push(category)
+							}
 						}
 					}
 				}
 
 				body = JSON.stringify(body)
-				saveTariffSaunaRequest(body).then((response) => {
-					$(".saved-container-sauna").prepend(
-						'<div class="successText">Успешно создано</div>'
-					)
-					$(".tariffs-sauna-list").append(`
-					<div class="tariffs-sauna-list__container entity-list">
-						<p class="tariffs-sauna-list__item" data-id="${response}">${nameForLayout}</p>
-						<p class="tariffs-sauna-list__item edit" id="editTariffSauna" data-link="bathhouse" data-id="${response}">[Редактировать]</p>
-						<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash ctariffs-sauna-list__item" id="deleteTariffItemSauna" data-id="${response}"></img>
-					</div>
-					`)
-					form.reset()
-					$('.js-overlay-tarif-sauna').fadeOut()
-					$('.js-overlay-tarif-sauna-internal').fadeOut()
-
+				if($(form).is('#tariffFormSaunaEdit')) {
+					let idTariff = $(form).attr('data-tariff')
 					if (data["categories"].length != 0) {
-						data["tariff_id"] = response
+						data["tariff_id"] = idTariff
 						data = JSON.stringify(data)
 						$.ajax({
 							type: "PUT",
@@ -6881,15 +7415,17 @@ define(["jquery"], function ($) {
 							data: data,
 							dataType: "json",
 							success: function (response) {
-								console.log(response)
+								form.reset()
+								$('.js-overlay-tarif-sauna-edit').fadeOut()
+								$('.js-overlay-tarif-sauna-internal').fadeOut()
 							},
 							error: function (err) {
 								console.debug(err)
 							},
 						})
 					}
-					if (collectDataPeriodSauna(saunaCategoriesData, response) != undefined) {
-						let periodsData = collectDataPeriodSauna(saunaCategoriesData, response)
+					if (collectDataPeriodSauna(saunaCategoriesData, idTariff) != undefined) {
+						let periodsData = collectDataPeriodSauna(saunaCategoriesData, idTariff)
 						if (periodsData["category"].length > 0) {
 							periodsData = JSON.stringify(periodsData)
 							$.ajax({
@@ -6904,7 +7440,9 @@ define(["jquery"], function ($) {
 								data: periodsData,
 								dataType: "json",
 								success: function (response) {
-									console.log(response)
+									let formPeriod = document.getElementById('formSaunaPeriod')
+									$('.js-overlay-tarif-sauna-internal').fadeOut()
+									formPeriod.reset()
 								},
 								error: function (err) {
 									console.debug(err)
@@ -6912,7 +7450,69 @@ define(["jquery"], function ($) {
 							})
 						}
 					}
-				})
+				} else {
+					saveTariffSaunaRequest(body).then((response) => {
+						$(".tariffs-sauna-list").append(`
+						<div class="tariffs-sauna-list__container entity-list">
+							<p class="tariffs-sauna-list__item" data-id="${response}">${nameForLayout}</p>
+							<div class="tariffs-sauna-list__item list__second-item">
+								<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/edit.png" class="tariffs-sauna-list__item edit" id="editTariffSauna" data-link="bathhouse" data-id="${response}"></img>
+								<img src="https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/icons/settings/delete.png" class="deleteTrash ctariffs-sauna-list__item" id="deleteTariffItemSauna" data-id="${response}"></img>
+							</div>
+						</div>
+						`)
+						form.reset()
+						$('.js-overlay-tarif-sauna').fadeOut()
+						$('.js-overlay-tarif-sauna-internal').fadeOut()
+	
+						if (data["categories"].length != 0) {
+							data["tariff_id"] = response
+							data = JSON.stringify(data)
+							$.ajax({
+								type: "PUT",
+								url:
+									"https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/change_tariffs.php?id=" +
+									AMOCRM.constant("account").id +
+									"&type_data=bathhouse&type_request=unique_dates",
+								headers: {
+									"Content-type": "application/json",
+								},
+								data: data,
+								dataType: "json",
+								success: function (response) {
+									console.log(response)
+								},
+								error: function (err) {
+									console.debug(err)
+								},
+							})
+						}
+						if (collectDataPeriodSauna(saunaCategoriesData, response) != undefined) {
+							let periodsData = collectDataPeriodSauna(saunaCategoriesData, response)
+							if (periodsData["category"].length > 0) {
+								periodsData = JSON.stringify(periodsData)
+								$.ajax({
+									type: "PUT",
+									url:
+										"https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/change_tariffs.php?id=" +
+										AMOCRM.constant("account").id +
+										"&type_data=bathhouse&type_request=periods",
+									headers: {
+										"Content-type": "application/json",
+									},
+									data: periodsData,
+									dataType: "json",
+									success: function (response) {
+										console.log(response)
+									},
+									error: function (err) {
+										console.debug(err)
+									},
+								})
+							}
+						}
+					})
+				}
 			}
 		}
 
@@ -7170,27 +7770,6 @@ define(["jquery"], function ($) {
 			initAdvancedSettings(dataG, navActiveType)
 		}
 
-		function saveDataSimple(data) {
-			let body = JSON.stringify(data)
-			$.ajax({
-				type: "POST",
-				url: "https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/save_settings.php",
-				headers: {
-					"Content-type": "application/json",
-				},
-				data: body,
-				dataType: "json",
-				success: function (response) {
-					if (response.status != "success") {
-						console.debug(response)
-					}
-				},
-				error: function (err) {
-					console.debug(err)
-				},
-			})
-		}
-
 		function cottageCategories(accountIdAmo) {
 			return new Promise((resolve, reject) => {
 				$.ajax({
@@ -7218,24 +7797,6 @@ define(["jquery"], function ($) {
 						"https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/get_categories.php?id=" +
 						accountIdAmo +
 						"&type_data=bathhouse&type_request=search&facilities&tariff_id",
-					dataType: "json",
-					success: (response) => {
-						resolve(response)
-					},
-					error: function (err) {
-						reject(err)
-					},
-				})
-			})
-		}
-
-		function getSettingsData(accountIdAmo) {
-			return new Promise((resolve, reject) => {
-				$.ajax({
-					type: "GET",
-					url:
-						"https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/get_settings.php?id=" +
-						accountIdAmo,
 					dataType: "json",
 					success: (response) => {
 						resolve(response)
@@ -7327,7 +7888,7 @@ define(["jquery"], function ($) {
 		</div>`
 		}
 
-		function collectDataPeriodCottage(cottageCategoriesData, tariff_id = "") {
+		function collectDataPeriodCottage(cottageCategoriesData, tariff_id = "", e = '') {
 			let error = formValidate()
 
 			function formValidate() {
@@ -7336,25 +7897,16 @@ define(["jquery"], function ($) {
 
 				for (let i = 0; i < formReq.length; i++) {
 					const input = formReq[i]
-					formRemoveError(input)
 
 					if (input.value === "") {
-						formAddError(input)
 						error++
 					}
 				}
 				return error
 			}
 
-			function formAddError(input) {
-				$(input).addClass("_error")
-			}
-			function formRemoveError(input) {
-				$(input).removeClass("_error")
-			}
-
 			if (error > 0) {
-
+				if(e != '') alert('Ключевые поля не заполнены')
 			} else {
 				let periods = {
 					tariff_id: tariff_id,
@@ -7384,7 +7936,7 @@ define(["jquery"], function ($) {
 			}
 		}
 
-		function collectDataPeriodSauna(saunaCategoriesData, tariff_id = "") {
+		function collectDataPeriodSauna(saunaCategoriesData, tariff_id = "", e = '') {
 			let error = formValidate()
 
 			function formValidate() {
@@ -7393,24 +7945,16 @@ define(["jquery"], function ($) {
 
 				for (let i = 0; i < formReq.length; i++) {
 					const input = formReq[i]
-					formRemoveError(input)
 
 					if (input.value === "") {
-						formAddError(input)
 						error++
 					}
 				}
 				return error
 			}
 
-			function formAddError(input) {
-				$(input).addClass("_error")
-			}
-			function formRemoveError(input) {
-				$(input).removeClass("_error")
-			}
-
 			if (error > 0) {
+				if(e != '') alert('Ключевые поля не заполнены')
 			} else {
 				let periods = {
 					tariff_id: tariff_id,
@@ -7696,6 +8240,9 @@ define(["jquery"], function ($) {
 				$("body").on("click", ".js-close-popup-tariff-cottage-edit", function (e) {
 					$(`.js-overlay-tariff-cottage-edit`).fadeOut()
 				})
+				$("body").on("click", ".js-close-popup-tariff-sauna-edit", function (e) {
+					$(`.js-overlay-tariff-sauna-edit`).fadeOut()
+				})
 				$(document).mouseup(function (e) {
 					let popup = $(`.js-popup`)
 					if (e.target != popup[0] && popup.has(e.target).length === 0) {
@@ -7709,6 +8256,21 @@ define(["jquery"], function ($) {
 				$("body").on("click", ".js-close-popup-sauna", function (e) {
 					$(`.js-overlay-sauna`).fadeOut()
 				})
+
+				$("body").on("click", "#add-object-sauna", function (e) {
+					$(`.js-overlay-object-sauna`).fadeIn()
+				})
+				$("body").on("click", ".js-close-popup-object-sauna", function (e) {
+					$(`.js-overlay-object-sauna`).fadeOut()
+				})
+
+				$("body").on("click", "#add-object-cottage", function (e) {
+					$(`.js-overlay-object-cottage`).fadeIn()
+				})
+				$("body").on("click", ".js-close-popup-object-cottage", function (e) {
+					$(`.js-overlay-object-cottage`).fadeOut()
+				})
+
 				$(document).mouseup(function (e) {
 					let popup = $(`.js-popup-sauna`)
 					if (e.target != popup[0] && popup.has(e.target).length === 0) {
@@ -7904,12 +8466,21 @@ define(["jquery"], function ($) {
 					}
 				})
 
-				$("body").on("click", "#saveTariffSauna", async function () {
+				$("body").on("click", "#saveTariffSauna", async function (e) {
 					if (!$("#saveTariffSauna").hasClass("button-input-disabled")) {
 						await saunaCategories(AMOCRM.constant("account").id).then(
 							(data) => (saunaCategoriesData = data)
 						)
-						saveTariffSauna(saunaCategoriesData)
+						saveTariffSauna(saunaCategoriesData, e)
+					}
+				})
+
+				$("body").on("click", "#saveTariffSaunaEdit", async function (e) {
+					if (!$("#saveTariffSaunaEdit").hasClass("button-input-disabled")) {
+						await saunaCategories(AMOCRM.constant("account").id).then(
+							(data) => (saunaCategoriesData = data)
+						)
+						saveTariffSauna(saunaCategoriesData, e)
 					}
 				})
 
@@ -7918,20 +8489,18 @@ define(["jquery"], function ($) {
 					let postfix = $(this).attr("data-link")
 					let idTariff = $(this).attr('data-tariff')
 					$(`.js-overlay-tarif-${postfix}-internal`).fadeIn()
-					console.log($(`.js-overlay-tarif-${postfix}-internal #addPeriod`).length);
-					$(`.js-overlay-tarif-${postfix}-internal #addPeriod`).attr('data-tariff', idTariff)
+					$(`.js-overlay-tarif-${postfix}-internal`).find('#addPeriod').attr('data-tariff', idTariff)
 				})
 
-				$("body").on("click", "#addPeriod", async function () {
+				$("body").on("click", "#addPeriod", async function (e) {
 					let idTariff = $(this).attr('data-tariff')
 					let typeData = $(this).attr('data-link')
-					if(typeData = 'hotel') {
+					if(typeData == 'hotel') {
 						await cottageCategories(AMOCRM.constant("account").id).then(
 							(data) => (cottageCategoriesData = data)
 						)
-						console.log(collectDataPeriodCottage(cottageCategoriesData, idTariff));
-						if (collectDataPeriodCottage(cottageCategoriesData, idTariff) != undefined) {
-							let periodsData = collectDataPeriodCottage(cottageCategoriesData, idTariff)
+						if (collectDataPeriodCottage(cottageCategoriesData, idTariff, e) != undefined) {
+							let periodsData = collectDataPeriodCottage(cottageCategoriesData, idTariff, e)
 							if (periodsData["category"].length > 0) {
 								periodsData = JSON.stringify(periodsData)
 								$.ajax({
@@ -7946,10 +8515,14 @@ define(["jquery"], function ($) {
 									data: periodsData,
 									dataType: "json",
 									success: function (response) {
-										console.log(response)
+										let form = document.getElementById('formCottagePeriod')
+										$('.js-overlay-tarif-cottage-internal').fadeOut()
+										form.reset()
 									},
 									error: function (err) {
-										console.debug(err)
+										let form = document.getElementById('formCottagePeriod')
+										$('.js-overlay-tarif-cottage-internal').fadeOut()
+										form.reset()
 									},
 								})
 							}
@@ -7958,8 +8531,8 @@ define(["jquery"], function ($) {
 						await saunaCategories(AMOCRM.constant("account").id).then(
 							(data) => (saunaCategoriesData = data)
 						)
-						if (collectDataPeriodCottage(saunaCategoriesData, idTariff) != undefined) {
-							let periodsData = collectDataPeriodCottage(saunaCategoriesData, idTariff)
+						if (collectDataPeriodSauna(saunaCategoriesData, idTariff, e) != undefined) {
+							let periodsData = collectDataPeriodSauna(saunaCategoriesData, idTariff, e)
 							if (periodsData["category"].length > 0) {
 								periodsData = JSON.stringify(periodsData)
 								$.ajax({
@@ -7974,10 +8547,14 @@ define(["jquery"], function ($) {
 									data: periodsData,
 									dataType: "json",
 									success: function (response) {
-										console.log(response)
+										let form = document.getElementById('formSaunaPeriod')
+										$('.js-overlay-tarif-sauna-internal').fadeOut()
+										form.reset()
 									},
 									error: function (err) {
-										console.debug(err)
+										let form = document.getElementById('formSaunaPeriod')
+										$('.js-overlay-tarif-sauna-internal').fadeOut()
+										form.reset()
 									},
 								})
 							}
@@ -8153,6 +8730,31 @@ define(["jquery"], function ($) {
 							console.debug(err)
 						},
 					})
+				})
+
+				$("body").on("click", "#editTariffSauna", function () {
+					let idTariff = $(this).attr("data-id")
+					let typeObject = $(this).attr("data-link")
+
+					$(".js-overlay-tariff-sauna-edit").fadeIn()
+					$.ajax({
+						type: "GET",
+						url:
+							"https://myrubikon.tech/_amocrm/our_catalog/widgets_data/booking/get_tariffs.php?id=" +
+							AMOCRM.constant("account").id +
+							`&type_data=${typeObject}&type_request=object&tariff_id=${idTariff}&with=uniquedates`,
+						dataType: "json",
+						success: function (response) {
+							editWindowTariffSauna(response, idTariff)
+						},
+						error: function (err) {
+							console.debug(err)
+						},
+					})
+				})
+
+				$('body').on('click', '#saveObjectCottage', function(e) {
+					addObjectCottage(e)
 				})
 
 				return true
